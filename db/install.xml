@@ -29,7 +29,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="progresspathid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="cmid" TYPE="int" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -39,6 +39,7 @@
       <INDEXES>
         <INDEX NAME="progresspathid_idx" UNIQUE="false" FIELDS="progresspathid"/>
         <INDEX NAME="cmid_idx" UNIQUE="false" FIELDS="cmid"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="progresspath_badges" COMMENT="Badges to be displayed on the progress path">
       <FIELDS>
@@ -55,5 +56,6 @@
         <INDEX NAME="progresspathid_idx" UNIQUE="false" FIELDS="progresspathid"/>
         <INDEX NAME="badgeid_idx" UNIQUE="false" FIELDS="badgeid"/>
       </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

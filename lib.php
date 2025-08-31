@@ -238,7 +238,7 @@ function progresspath_cm_info_view(cm_info $cm): void {
  * @param cm_info $cm course module object for the progresspath
  * @return array
  */
-function progresspath_get_place_cm(cm_info $cm): array {
+function progresspath_get_cm(cm_info $cm): array {
     global $DB;
     $modules = $DB->get_field('progresspath_items', 'cmid', ['progresspathid' => $cm->instance]);
     return $modules;
@@ -262,12 +262,12 @@ function progresspath_get_progresspath(cm_info $cm): string {
     $svg = $file->get_content();
 
     $items = $DB->get_records('progresspath_items', ['progresspathid' => $cm->instance]);
-
-    $map = $DB->get_record("progresspath", ["id" => $cm->instance]);
+    $badges = $DB->get_records('progresspath_badges', ['progresspathid' => $cm->instance]);
+    $path = $DB->get_record("progresspath", ["id" => $cm->instance]);
 
     $group = (empty($cm->groupmode) ? 0 : groups_get_activity_group($cm, true));
 
-    $worker = new \mod_progresspath\mapworker($svg, $items, $cm, $group);
+    $worker = new \mod_progresspath\mapworker($svg, $cm, $group);
     $worker->process_map_objects();
     $worker->remove_tags_before_svg();
 
