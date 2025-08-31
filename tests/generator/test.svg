@@ -75,7 +75,7 @@
         <path class="progresspath-path" id="p8_9"
             d="M 634.7630004882812 151.31727600097656 L 310.7688293457031 1610.8843994140625"></path>
     </g>
-    <g id="placesGroup">
+    <g id="itemsGroup">
         <a id="a0" xlink:href="">
             <circle class="progresspath-place progresspath-draggable progresspath-emptyplace" id="p0"
                 cx="87.69086869147608" cy="62.08608864410135" r="10"></circle>

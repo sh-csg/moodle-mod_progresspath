@@ -1,6 +1,6 @@
 # progress paths
 
-A progresspath provides an easy way of improving the visualization of activities in a moodle course. Activities are represented as places (i.e. dots) on the map, connected by paths (i.e. lines). Activities and paths are initially invisible. Every time an activity attached to a place is completed, the place changes its color (e.g. from red to green) and all connected paths and places are gradually revealed.
+A progresspath provides an easy way of improving the visualization of activities in a moodle course. Activities are represented as items (i.e. dots) on the map, connected by paths (i.e. lines). Activities and paths are initially invisible. Every time an activity attached to a place is completed, the place changes its color (e.g. from red to green) and all connected paths and items are gradually revealed.
 
 ## Use of progresspaths
 
@@ -8,11 +8,11 @@ progress paths can be used in many ways. They can include all activities of a co
 
 ## Start and completion
 
-On a progresspath you can define visible starting places. The first place you put on the map is a starting place by default. You can also define places as target places. They can be used for automatic completion of the map in three different ways: 1. The map is completed if one target place is reached (i.e. the linked activity is completed), 2. all target places are reached, 3. all places are reached. This is very convenient when using nested maps. As a consequence, progresspaths can also be used to replace parts of the function of mod_checklist.
+On a progresspath you can define visible starting items. The first place you put on the map is a starting place by default. You can also define items as target items. They can be used for automatic completion of the map in three different ways: 1. The map is completed if one target place is reached (i.e. the linked activity is completed), 2. all target items are reached, 3. all items are reached. This is very convenient when using nested maps. As a consequence, progresspaths can also be used to replace parts of the function of mod_checklist.
 
 ## Features
 
-As a background image, you can use any image which can be viewed in a web browser (e.g. JPG, PNG, GIF, SVG). The map is resized to the size of the image and fully responsive. You can change the color of places (different colors for visited / unvisited places) and the lines of places and paths. Target places are highlighted for the participants. If necessary, you can also hide the paths or show a checkmark at visited places.
+As a background image, you can use any image which can be viewed in a web browser (e.g. JPG, PNG, GIF, SVG). The map is resized to the size of the image and fully responsive. You can change the color of items (different colors for visited / unvisited items) and the lines of items and paths. Target items are highlighted for the participants. If necessary, you can also hide the paths or show a checkmark at visited items.
 The map is always updated when the completion state of a linked activity changes. If the progresspath is embedded on a course page and manual completion of a linked activity is triggered, a page reload is forced to keep the map status correct. If an activity has additional restrictions (e.g. visible only after a certain date), progresspath will display it only if these restrictions are fulfilled.
 
 ## Use of the editor
@@ -20,10 +20,10 @@ The map is always updated when the completion state of a linked activity changes
 Using the editor is very easy:
 
 1. Choose your background image - it will be immediately shown in the map editor
-2. Add places (double click on the map)
-3. Link places to activities (right click on the place)
-4. Connect places by a (single) click on both places
-5. Remove paths / places by double-clicking them
+2. Add items (double click on the map)
+3. Link items to activities (right click on the place)
+4. Connect items by a (single) click on both items
+5. Remove paths / items by double-clicking them
 
 If a place is not linked to an activity it is shown with reduced opacity.
 

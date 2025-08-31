@@ -98,42 +98,4 @@ class activitymanager {
         }
         return false;
     }
-
-    /**
-     * Returns the order of completion for the given array of course modules. Respects group mode.
-     *
-     * @param array $cms Course modules to check, array of objects with at least id attribute set or array of course module ids.
-     * @return array Course module ids in order of completion
-     */
-    public function get_completion_order(array $cms): array {
-        if (count($cms) > 0 && intval(current($cms)) > 0) {
-            $intcms = $cms;
-            $cms = array_map(function ($value) {
-                $obj = new stdClass();
-                $obj->id = $value;
-                $obj->course = $this->course;
-                return $obj;
-            }, $intcms);
-        }
-        $completiontime = [];
-        foreach ($cms as $cm) {
-            foreach ($this->members as $member) {
-                if (
-                    $this->completion->get_data($cm, true, $member->id)->completionstate == COMPLETION_COMPLETE ||
-                    $this->completion->get_data($cm, true, $member->id)->completionstate == COMPLETION_COMPLETE_PASS ||
-                    (
-                        intval($cm->completionpassgrade) == 0 &&
-                        $this->completion->get_data($cm, true, $member->id)->completionstate == COMPLETION_COMPLETE_FAIL
-                    )
-                ) {
-                    $completed = $this->completion->get_data($cm, true, $member->id)->timemodified;
-                    if (!isset($completiontime[$cm->id]) || $completed < $completiontime[$cm->id]) {
-                        $completiontime[$cm->id] = $completed;
-                    }
-                }
-            }
-        }
-        asort($completiontime);
-        return array_keys($completiontime);
-    }
 }

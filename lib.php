@@ -149,7 +149,7 @@ function progresspath_get_coursemodule_info($cm): cached_cm_info {
         'nocompletion',
         'completion_with_one_target',
         'completion_with_all_targets',
-        'completion_with_all_places',
+        'completion_with_all_items',
     ];
 
     if ($cm->completion == COMPLETION_TRACKING_AUTOMATIC && $map->completiontype > 0) {
@@ -234,7 +234,7 @@ function progresspath_cm_info_view(cm_info $cm): void {
 }
 
 /**
- * Returns all course module ids for places of a certain progresspath.
+ * Returns all course module ids for items of a certain progresspath.
  * @param cm_info $cm course module object for the progresspath
  * @return array
  */

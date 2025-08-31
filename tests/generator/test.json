@@ -1,6 +1,6 @@
 {
     "id": 10,
-    "places": [
+    "items": [
         {
             "id": "p0",
             "linkId": "a0",
@@ -139,10 +139,10 @@
             "hidepath": null
         }
     ],
-    "startingplaces": [
+    "startingitems": [
         "p0"
     ],
-    "targetplaces": [
+    "targetitems": [
         "p8",
         "p9"
     ],

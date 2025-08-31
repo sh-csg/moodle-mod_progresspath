@@ -17,6 +17,7 @@
 namespace mod_progresspath;
 
 use DOMDocument;
+use DOMXPath;
 
 /**
  * Class for handling the content of the progresspath
@@ -33,15 +34,15 @@ class svgmap {
      */
     protected DOMDocument $dom;
     /**
+     * DOMXPath for querying the SVG
+     * @var DOMXPath
+     */
+    protected DOMXPath $xpath;
+    /**
      * String containing the SVG code (synchronized with $dom)
      * @var string
      */
     protected string $svgcode;
-    /**
-     * Array containing the placestore
-     * @var array
-     */
-    protected array $placestore;
     /**
      * String to prepend to the SVG code (for parsing by DOMDocument)
      * @var string
@@ -51,12 +52,10 @@ class svgmap {
      * Creates map from SVG code
      *
      * @param string $svgcode The SVG code to build the map from
-     * @param array $placestore The placestore data to use while processing the map
      */
-    public function __construct(string $svgcode, array $placestore) {
+    public function __construct(string $svgcode) {
         global $CFG;
         $this->svgcode = $svgcode;
-        $this->placestore = $placestore;
         // This fixes a problem for loading SVG DTD on Windows locally.
         if (strcasecmp(substr(PHP_OS, 0, 3), 'WIN') == 0) {
             $dtd = '' . new \moodle_url('/mod/progresspath/pix/svg11.dtd');
@@ -69,6 +68,7 @@ class svgmap {
         $this->dom->validateOnParse = true;
         $this->dom->preserveWhiteSpace = false;
         $this->dom->formatOutput = true;
+        $this->xpath = new \DOMXPath($this->dom);
 
         $this->load_dom();
     }
@@ -84,32 +84,17 @@ class svgmap {
     }
 
     /**
-     * Replaces the stylesheet with a new one generated from placestore
+     * Reitems the stylesheet with a new one generated from itemstore
      *
-     * @param array $placestoreoverride array of overrides for placestore
+     * @param array $itemstoreoverride array of overrides for itemstore
      * @return void
      */
-    public function replace_stylesheet(array $placestoreoverride = []): void {
+    public function replace_stylesheet(array $itemstoreoverride = []): void {
         global $OUTPUT;
-        $placestorelocal = array_merge($this->placestore, $placestoreoverride);
+        $itemstorelocal = array_merge($this->itemstore, $itemstoreoverride);
         $this->svgcode = preg_replace(
             '/<style[\s\S]*style>/i',
-            $OUTPUT->render_from_template('mod_progresspath/cssskeleton', $placestorelocal),
-            $this->svgcode
-        );
-        $this->load_dom();
-    }
-
-    /**
-     * Replaces the svg defs (e.g.) filters or patterns that are defined for use in the document without being directly visible.
-     *
-     * @return void
-     */
-    public function replace_defs(): void {
-        global $OUTPUT;
-        $this->svgcode = preg_replace(
-            '/<defs[\s\S]*defs>/i',
-            $OUTPUT->render_from_template('mod_progresspath/svgdefs', []),
+            $OUTPUT->render_from_template('mod_progresspath/cssskeleton', $itemstorelocal),
             $this->svgcode
         );
         $this->load_dom();
@@ -156,264 +141,64 @@ class svgmap {
     }
 
     /**
-     * Remove a place or path. If removing a place also the link and the connected paths are removed.
+     * Wraps an item in a link.
      *
      * @param string $id Id of a place or path
+     * @param string $url URL to link to
      * @return void
      */
-    public function remove_place_or_path(string $id): void {
-        $placeorpath = $this->dom->getElementById($id);
-        if ($placeorpath) {
-            if ($placeorpath->nodeName == 'circle') {
-                // Also remove connected paths for places.
-                foreach ($this->placestore['paths'] as $path) {
-                    if ($path['sid'] == $id || $path['fid'] == $id) {
-                        $this->remove_place_or_path($path['id']);
-                    }
-                }
-                // Make sure that also the link node is removed.
-                $placeorpath = $placeorpath->parentNode;
-            }
-            $placeorpath->parentNode->removeChild($placeorpath);
-        }
-    }
-
-    /**
-     * Sets the URL of a link.
-     *
-     * @param string $linkid Id of the link
-     * @param string $url URL to set the xlink:href attribute to
-     * @return void
-     */
-    public function set_link(string $linkid, string $url): void {
-        $link = $this->dom->getElementById($linkid);
-        if ($link) {
+    public function wrap_in_link(string $id, string $url): void {
+        $element = $this->dom->getElementById($id);
+        if ($element) {
+            $link = $this->dom->createElement('a');
             $link->setAttribute('xlink:href', $url);
+            $element->parentNode->insertBefore($link, $element);
+            $link->appendChild($element);
         }
     }
 
     /**
-     * Removes a link without removing the place.
+     * Inserts an image into the SVG.
      *
-     * @param string $linkid Id of the link
+     * @param string $parentid Id of the parent element
+     * @param string $url URL of the image
+     * @param int $width Width of the image
+     * @param int $height Height of the image
      * @return void
      */
-    public function remove_link(string $linkid): void {
-        $link = $this->dom->getElementById($linkid);
-        if ($link) {
-            $link->removeAttribute('xlink:href');
+    public function insert_image(string $parentid, string $url, int $width, int $height): void {
+        $parent = $this->dom->getElementById($parentid);
+        if ($parent) {
+            $image = $this->dom->createElement('image');
+            $image->setAttribute('xlink:href', $url);
+            $image->setAttribute('id', 'progresspath-image');
+            $image->setAttribute('width', (string)$width);
+            $image->setAttribute('height', (string)$height);
+            $parent->insertBefore($image, $parent->firstChild);
         }
     }
 
     /**
-     * Updates the activity name for a place.
-     *
-     * @param string $placeid Id of the place
-     * @param string $text Name of the activity
-     * @param string $additionaltitle Additional information to add to the title (for accessibility)
-     * @return void
-     */
-    public function update_text_and_title(string $placeid, string $text, string $additionaltitle): void {
-        // Set the title element for the link (for accessibility) and for a tooltip when hovering
-        // the link.
-        $titlenode = $this->dom->getElementById('title' . $placeid);
-        if ($titlenode) {
-            $titlenode->nodeValue = $text . $additionaltitle;
-        }
-        // Set the text element for the link.
-        $textnode = $this->dom->getElementById('text' . $placeid);
-        if ($textnode) {
-            $textnode->nodeValue = $text;
-        }
-    }
-
-    /**
-     * Adds the progresspath-hidden class to a place or path.
+     * Adds the progresspath-hidden class to an element.
      *
      * @param string $id Id of a place or path
      * @return void
      */
     public function set_hidden(string $id): void {
-        $placeorpath = $this->dom->getElementById($id);
-        if ($placeorpath) {
-            $placeorpath->setAttribute('class', $placeorpath->getAttribute('class') . ' progresspath-hidden');
+        $element = $this->dom->getElementById($id);
+        if ($element) {
+            $element->setAttribute('class', $element->getAttribute('class') . ' progresspath-hidden');
         }
     }
 
     /**
-     * Adds the progresspath-reachable class to a place or path.
+     * Emulates getElementsByClassname via XPath
      *
-     * @param string $id Id of a place or path
-     * @return void
+     * @param string $classname The class name to search for
+     * @return array An array of matching elements
      */
-    public function set_reachable(string $id): void {
-        $placeorpath = $this->dom->getElementById($id);
-        if ($placeorpath) {
-            $placeorpath->setAttribute('class', $placeorpath->getAttribute('class') . ' progresspath-reachable');
-        }
-    }
-
-    /**
-     * Adds the progresspath-visited class to a place or path. Currently only used for places.
-     *
-     * @param string $id Id of a place or path
-     * @return void
-     */
-    public function set_visited(string $id): void {
-        $placeorpath = $this->dom->getElementById($id);
-        if ($placeorpath) {
-            $placeorpath->setAttribute('class', $placeorpath->getAttribute('class') . ' progresspath-visited');
-        }
-    }
-
-    /**
-     * Adds the progresspath-waygone class to a path.
-     *
-     * @param string $id Id of a path
-     * @return void
-     */
-    public function set_waygone(string $id): void {
-        $path = $this->dom->getElementById($id);
-        if ($path) {
-            $path->setAttribute('class', $path->getAttribute('class') . ' progresspath-waygone');
-        }
-    }
-
-    /**
-     * Adds a checkmark to a place.
-     *
-     * @param string $placeid Id of a place
-     * @return void
-     */
-    public function add_checkmark(string $placeid): void {
-        $place = $this->dom->getElementById($placeid);
-        if ($place) {
-            $x = $place->getAttribute('cx');
-            $y = $place->getAttribute('cy');
-            $use = $this->dom->createElement('use');
-            $use->setAttribute('xlink:href', '#checkmark');
-            $use->setAttribute('transform', 'translate(' . $x . ' ' . $y . ')');
-            $use->setAttribute('class', 'progresspath-checkmark');
-            $place->parentNode->appendChild($use);
-        }
-    }
-
-    /**
-     * Returns the coordinates of all paths and places for building the overlay.
-     *
-     * @return array Array of x and y coordinates
-     */
-    public function get_coordinates(): array {
-        global $CFG;
-        $coordinates = [];
-        $pathsgroup = $this->dom->getElementById('pathsGroup');
-        $placesgroup = $this->dom->getElementById('placesGroup');
-        if (empty($this->placestore['hidepaths'])) {
-            // Only processing quadratic bezier curves here as other paths are already handled
-            // via the coordinates of the corresponding places.
-            $paths = $pathsgroup->getElementsByTagName('path');
-            foreach ($paths as $pathnode) {
-                // When path is a quadratic bezier curve, the extremal point needs to be in the coordinates array.
-                // The point is calculated here.
-                if (strpos($pathnode->getAttribute('d'), 'Q')) {
-                    $parts = explode(' ', $pathnode->getAttribute('d'));
-                    $fromx = intval($parts[1]);
-                    $fromy = intval($parts[2]);
-                    $betweenx = intval($parts[4]);
-                    $betweeny = intval($parts[5]);
-                    $tox = intval($parts[6]);
-                    $toy = intval($parts[7]);
-                    $coordx = $betweenx * 0.5 + ($fromx + $tox) * 0.25;
-                    $coordy = $betweeny * 0.5 + ($fromy + $toy) * 0.25;
-                    $coordinates[] = ['x' => intval($coordx), 'y' => intval($coordy)];
-                }
-            }
-        }
-        $places = $placesgroup->getElementsByTagName('circle');
-        foreach ($places as $placenode) {
-            $cx = intval($placenode->getAttribute('cx'));
-            $cy = intval($placenode->getAttribute('cy'));
-            $coordinates[] = ['x' => $cx, 'y' => $cy];
-            if ($this->placestore['showtext']) {
-                $text = $this->dom->getElementById('text' . $placenode->getAttribute('id'));
-                if ($text) {
-                    // Delta of the text in relation to the places center coordinates.
-                    $dx = $text->getAttribute('dx');
-                    $dy = $text->getAttribute('dy');
-                    // Calculate the corner coordinates of the text element. They all are added
-                    // to the coordinates array as they extend the area that needs to be visible.
-                    $bbox = imagettfbbox(20, 0, $CFG->dirroot . '/lib/default.ttf', $text->nodeValue);
-                    $coordinates[] = ['x' => $cx + $dx + $bbox[0], 'y' => $cy + $dy + $bbox[1]];
-                    $coordinates[] = ['x' => $cx + $dx + $bbox[2], 'y' => $cy + $dy + $bbox[3]];
-                    $coordinates[] = ['x' => $cx + $dx + $bbox[4], 'y' => $cy + $dy + $bbox[5]];
-                    $coordinates[] = ['x' => $cx + $dx + $bbox[6], 'y' => $cy + $dy + $bbox[7]];
-                }
-            }
-        }
-        return $coordinates;
-    }
-
-    /**
-     * Adds an overlay to the map (for slicemode) revealing only the availble parts of the map.
-     *
-     * @return void
-     */
-    public function add_overlay(): void {
-        $coordinates = $this->get_coordinates();
-        if (count($coordinates) > 0) {
-            $backgroundnode = $this->dom->getElementById('progresspath-background-image');
-            $height = $backgroundnode->getAttribute('height');
-            $c = array_pop($coordinates);
-            $minx = $c['x'];
-            $miny = $c['y'];
-            $maxx = $c['x'];
-            $maxy = $c['y'];
-            // Find the maximum / minimum x and y coordinates.
-            foreach ($coordinates as $coord) {
-                $minx = min($minx, $coord['x']);
-                $miny = min($miny, $coord['y']);
-                $maxx = max($maxx, $coord['x']);
-                $maxy = max($maxy, $coord['y']);
-            }
-
-            // When the maximum / minimum coordinates are too tight, increase padding.
-            if ($maxx - $minx < 100 && $maxy - $miny < 100) {
-                $padding = 50;
-            } else {
-                $padding = 15;
-            }
-
-            // Maximum / minimum coordinates should not be outside the background image.
-            $minx = max(0, $minx - $padding);
-            $miny = max(0, $miny - $padding);
-            $maxx = min(800, $maxx + $padding);
-            $maxy = min($height, $maxy + $padding);
-
-            $placesgroup = $this->dom->getElementById('placesGroup');
-
-            // Create the overlay for slicemode.
-            $overlay = $this->dom->createElement('path');
-            $overlaydescription = "M 0 0 L 0 $height L 800 $height L 800 0 Z ";
-            // In future versions there will be more options for the inner part of the overlay.
-            // For now the default is a rectangular shape.
-            $type = 'rect';
-            switch ($type) {
-                // Kept for future use.
-                case 'ellipse':
-                    $radiusx = 0.5 * ($maxx - $minx);
-                    $radiusy = 0.5 * ($maxy - $miny);
-                    $overlaydescription .= "M $minx $miny A $radiusx $radiusy 0 1 1 $maxx $maxy ";
-                    $overlaydescription .= "A $radiusx $radiusy 0 1 1 $minx $miny";
-                    break;
-                default:
-                    $overlaydescription .= "M $minx $miny L $maxx $miny L $maxx $maxy L $minx $maxy Z";
-            }
-            $overlay->setAttribute('d', $overlaydescription);
-            $overlay->setAttribute('fill', 'url(#fog)');
-            $overlay->setAttribute('filter', 'url(#blur)');
-            $overlay->setAttribute('stroke', 'none');
-            $overlay->setAttribute('id', 'progresspath-overlay');
-            $placesgroup->appendChild($overlay);
-        }
+    public function get_elements_by_classname(string $classname): array {
+        $elements = $this->xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' $classname ')]");
+        return iterator_to_array($elements);
     }
 }

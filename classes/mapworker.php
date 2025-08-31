@@ -16,6 +16,8 @@
 
 namespace mod_progresspath;
 
+use cm_info;
+
 /**
  * Class for handling the content of the progresspath
  *
@@ -31,20 +33,10 @@ class mapworker {
      */
     protected svgmap $svgmap;
     /**
-     * Array containing the placestore
-     * @var array
-     */
-    protected array $placestore;
-    /**
      * Course module object belonging to the map - only needed for completion
      * @var cm_info
      */
-    protected \cm_info $cm;
-    /**
-     * Whether to prepare the code for edit mode
-     * @var bool
-     */
-    protected bool $edit;
+    protected cm_info $cm;
     /**
      * Stores the group id when using group mode. 0 if no group is used.
      * @var int
@@ -55,44 +47,36 @@ class mapworker {
      * @var activitymanager
      */
     protected activitymanager $activitymanager;
-    /**
-     * Active places
-     * @var array
-     */
-    protected array $active;
 
     /**
      * Creates mapworker from SVG code
      *
      * @param string $svgcode The SVG code to build the map from
-     * @param array $placestore The placestore data to use while processing the map
      * @param cm_info|null $cm The course module that belongs to the map (null by default)
      * @param int $group Group id to use (default 0 means no group)
      */
     public function __construct(
         string $svgcode,
-        array $placestore,
-        \cm_info $cm = null, // phpcs:ignore
+        ?cm_info $cm = null,
         int $group = 0
     ) {
         global $USER;
-        $this->svgmap = new svgmap($svgcode, $placestore);
+        $this->svgmap = new svgmap($svgcode);
         $this->group = $group;
         if (!is_null($cm)) {
             $this->cm = $cm;
             $this->activitymanager = new activitymanager($cm->get_course(), $USER, $group);
         }
-        $this->active = [];
     }
 
     /**
-     * Replaces the stylesheet with a new one generated from placestore
+     * Reitems the stylesheet with a new one generated from itemstore
      *
-     * @param array $placestoreoverride array of overrides for placestore
+     * @param array $itemstoreoverride array of overrides for itemstore
      * @return void
      */
-    public function replace_stylesheet(array $placestoreoverride = []): void {
-        $this->svgmap->replace_stylesheet($placestoreoverride);
+    public function replace_stylesheet(array $itemstoreoverride = []): void {
+        $this->svgmap->replace_stylesheet($itemstoreoverride);
     }
 
     /**
@@ -105,27 +89,28 @@ class mapworker {
     }
 
     /**
-     * Process the map to show / hide paths and places
+     * Process the map to show / hide paths and items
      * @return void
      */
     public function process_map_objects(): void {
-        global $CFG, $USER;
-        $this->active = [];
-        $completedplaces = [];
+        global $CFG, $DB, $USER;
+        $completeditems = [];
         $notavailable = [];
-        $allplaces = [];
+        $allitems = [];
         $links = [];
 
         $modinfo = get_fast_modinfo($this->cm->get_course(), $USER->id);
 
         $allcms = array_keys($modinfo->get_cms());
         $allcmids = [];
-        $cmidtoplaces = [];
+        $cmidtoitems = [];
 
-        // Walk through all places in the map.
-        foreach ($this->placestore['places'] as $place) {
-            $allplaces[] = $place['id'];
-            // Remove places that are not linked to an activity or where the activity is missing.
+        $DB->get_records('progresspath_items', ['progresspathid' => ])
+
+        // Walk through all items in the map.
+        foreach ($this->itemstore['items'] as $place) {
+            $allitems[] = $place['id'];
+            // Remove items that are not linked to an activity or where the activity is missing.
             if (empty($place['linkedActivity']) || !in_array($place['linkedActivity'], $allcms)) {
                 $impossible[] = $place['id'];
                 if (!$this->edit) {
@@ -134,7 +119,7 @@ class mapworker {
                 continue;
             }
             $allcmids[] = $place['linkedActivity'];
-            $cmidtoplaces[$place['linkedActivity']][] = $place['id'];
+            $cmidtoitems[$place['linkedActivity']][] = $place['id'];
 
             $placecm = $modinfo->get_cm($place['linkedActivity']);
 
@@ -154,19 +139,19 @@ class mapworker {
             $this->svgmap->update_text_and_title(
                 $place['id'],
                 $placecm->get_formatted_name(),
-                // Add info to target places (for accessibility).
-                in_array($place['id'], $this->placestore['targetplaces']) ?
+                // Add info to target items (for accessibility).
+                in_array($place['id'], $this->itemstore['targetitems']) ?
                 ' (' . get_string('targetplace', 'progresspath') . ')' :
                 ''
             );
-            // If the place is a starting place, add it to the active places.
-            if (in_array($place['id'], $this->placestore['startingplaces'])) {
+            // If the place is a starting place, add it to the active items.
+            if (in_array($place['id'], $this->itemstore['startingitems'])) {
                 $this->active[] = $place['id'];
             }
             // If the activity linked to the place is already completed, add it to the completed
-            // and to the active places.
+            // and to the active items.
             if ($this->activitymanager->is_completed($placecm)) {
-                $completedplaces[] = $place['id'];
+                $completeditems[] = $place['id'];
                 $this->active[] = $place['id'];
             }
             // Places that are not accessible (e.g. because of additional availability restrictions)
@@ -181,12 +166,12 @@ class mapworker {
             }
         }
         if (!($this->edit)) {
-            foreach ($this->placestore['paths'] as $path) {
+            foreach ($this->itemstore['paths'] as $path) {
                 // If the beginning or the ending of the path is a completed place and this place is available,
                 // show path and the place on the other end.
-                if (in_array($path['sid'], $completedplaces) || in_array($path['fid'], $completedplaces)) {
-                    // Only set paths visible if hidepaths is not set in placestore.
-                    if (!$this->placestore['hidepaths']) {
+                if (in_array($path['sid'], $completeditems) || in_array($path['fid'], $completeditems)) {
+                    // Only set paths visible if hidepaths is not set in itemstore.
+                    if (!$this->itemstore['hidepaths']) {
                         $this->active[] = $path['id'];
                     }
                     $this->active[] = $path['fid'];
@@ -194,32 +179,32 @@ class mapworker {
                 }
             }
             $this->active = array_unique($this->active);
-            // Set all active paths and places to visible.
+            // Set all active paths and items to visible.
             foreach ($this->active as $a) {
                 $this->svgmap->set_reachable($a);
             }
-            // Make all completed places visible and set color for visited places.
-            foreach ($completedplaces as $place) {
+            // Make all completed items visible and set color for visited items.
+            foreach ($completeditems as $place) {
                 $this->svgmap->set_visited($place);
                 // If the option "usecheckmark" is selected, add the checkmark to the circle.
-                if ($this->placestore['usecheckmark']) {
+                if ($this->itemstore['usecheckmark']) {
                     $this->svgmap->add_checkmark($place);
                 }
             }
             $notavailable = array_merge(
-                array_diff($allplaces, $notavailable, $completedplaces, $this->active, $impossible),
+                array_diff($allitems, $notavailable, $completeditems, $this->active, $impossible),
                 $notavailable
             );
-            // Handle unavailable places.
+            // Handle unavailable items.
             foreach ($notavailable as $place) {
-                if (empty($this->placestore['showall'])) {
+                if (empty($this->itemstore['showall'])) {
                     $this->svgmap->remove_place_or_path($place);
                 } else {
                     $this->svgmap->set_hidden($links[$place]);
                     $this->svgmap->remove_link($links[$place]);
                 }
             }
-            // Remove all places that are impossible to reach.
+            // Remove all items that are impossible to reach.
             foreach ($impossible as $place) {
                 $this->svgmap->remove_place_or_path($place);
             }
@@ -245,13 +230,5 @@ class mapworker {
      */
     public function get_attribute(string $id, string $attribute): ?string {
         return $this->svgmap->get_attribute($id, $attribute);
-    }
-
-    /**
-     * Get active paths and places (for unit testing). process_map_objects() must be called first.
-     * @return array names of active paths and places
-     */
-    public function get_active(): array {
-        return $this->active;
     }
 }

@@ -75,27 +75,10 @@ class autoupdate {
         global $DB;
 
         $data = $event->get_data();
-        if (isset($data['courseid']) && $data['courseid'] > 0) {
-            $modinfo = get_fast_modinfo($data['courseid']);
-            $instances = $modinfo->get_instances_of('progresspath');
-            if (count($instances) > 0) {
-                foreach ($instances as $i) {
-                    if ($map = $DB->get_record('progresspath', ['id' => $i->instance], 'placestore')) {
-                        $changed = false;
-                        $placestore = json_decode($map->placestore);
-                        foreach ($placestore->places as $p) {
-                            if ($p->linkedActivity == $data['objectid']) {
-                                $p->linkedActivity = null;
-                                cachemanager::remove_cmid($data['objectid']);
-                                $changed = true;
-                            }
-                        }
-                        if ($changed) {
-                            $DB->set_field('progresspath', 'placestore', json_encode($placestore), ['id' => $i->instance]);
-                        }
-                    }
-                }
-            }
+        if (!empty($data['courseid']) && !empty($data['objectid'])) {
+            $DB->delete_records('progresspath_items', ['cmid' => $data['objectid']]);
+            cachemanager::remove_cmid($data['objectid']);
+            self::update_from_event($event);
         }
 
         // If the course module was a progresspath, reset the backlink cache of the whole course.

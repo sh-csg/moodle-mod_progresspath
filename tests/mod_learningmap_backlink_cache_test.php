@@ -80,10 +80,10 @@ final class mod_progresspath_backlink_cache_test extends \advanced_testcase {
                     'completionview' => COMPLETION_VIEW_REQUIRED,
                 ]
             );
-            $this->progresspaths[$progresspathnumber]->placestore = str_replace(
+            $this->progresspaths[$progresspathnumber]->itemstore = str_replace(
                 99990 + $activitynumber,
                 $this->activities[$progresspathnumber][$activitynumber]->cmid,
-                $this->progresspaths[$progresspathnumber]->placestore
+                $this->progresspaths[$progresspathnumber]->itemstore
             );
         }
         $this->activities[3][0] = $this->getDataGenerator()->create_module(
@@ -94,9 +94,9 @@ final class mod_progresspath_backlink_cache_test extends \advanced_testcase {
                 'course' => $this->courses[1],
             ]
         );
-        $DB->set_field('progresspath', 'placestore', $this->progresspaths[0]->placestore, ['id' => $this->progresspaths[0]->id]);
-        $DB->set_field('progresspath', 'placestore', $this->progresspaths[1]->placestore, ['id' => $this->progresspaths[1]->id]);
-        $DB->set_field('progresspath', 'placestore', $this->progresspaths[2]->placestore, ['id' => $this->progresspaths[2]->id]);
+        $DB->set_field('progresspath', 'itemstore', $this->progresspaths[0]->itemstore, ['id' => $this->progresspaths[0]->id]);
+        $DB->set_field('progresspath', 'itemstore', $this->progresspaths[1]->itemstore, ['id' => $this->progresspaths[1]->id]);
+        $DB->set_field('progresspath', 'itemstore', $this->progresspaths[2]->itemstore, ['id' => $this->progresspaths[2]->id]);
 
         $studentrole = $DB->get_record('role', ['shortname' => 'student']);
 

@@ -71,7 +71,7 @@ class restore_progresspath_activity_task extends restore_activity_task {
     }
 
     /**
-     * Update placestore to new module ids after restore is complete
+     * Update itemstore to new module ids after restore is complete
      * @throws dml_exception
      */
     public function after_restore(): void {
@@ -82,9 +82,9 @@ class restore_progresspath_activity_task extends restore_activity_task {
         $item = $DB->get_record('progresspath', ['id' => $this->get_activityid()], '*', MUST_EXIST);
         $cm = get_coursemodule_from_instance('progresspath', $item->id, $courseid);
 
-        $placestore = json_decode($item->placestore);
+        $itemstore = json_decode($item->itemstore);
 
-        foreach ($placestore->places as $place) {
+        foreach ($itemstore->items as $place) {
             if ($place->linkedActivity) {
                 $moduleid = restore_dbops::get_backup_ids_record($this->get_restoreid(), 'course_module', $place->linkedActivity);
                 if ($moduleid) {
@@ -100,15 +100,15 @@ class restore_progresspath_activity_task extends restore_activity_task {
                 }
             }
         }
-        $oldmapid = $placestore->mapid;
+        $oldmapid = $itemstore->mapid;
         $newmapid = uniqid();
-        $placestore->mapid = $newmapid;
+        $itemstore->mapid = $newmapid;
 
-        if (!isset($placestore->version) || $placestore->version < 2024072201) {
-            $placestore->version = 2024072201;
+        if (!isset($itemstore->version) || $itemstore->version < 2024072201) {
+            $itemstore->version = 2024072201;
             // Needs 1 as default value (otherwise all place strokes would be hidden).
-            if (!isset($placestore->strokeopacity)) {
-                $placestore->strokeopacity = 1;
+            if (!isset($itemstore->strokeopacity)) {
+                $itemstore->strokeopacity = 1;
             }
             if (empty($item->svgcode)) {
                 $mapcode = $item->intro;
@@ -118,13 +118,13 @@ class restore_progresspath_activity_task extends restore_activity_task {
             } else {
                 $mapcode = $item->svgcode;
             }
-            $mapworker = new \mod_progresspath\mapworker($mapcode, (array)$placestore);
+            $mapworker = new \mod_progresspath\mapworker($mapcode, (array)$itemstore);
             $mapworker->replace_stylesheet();
             $mapworker->replace_defs();
             $item->svgcode = $mapworker->get_svgcode();
         }
         $item->svgcode = str_replace('progresspath-svgmap-' . $oldmapid, 'progresspath-svgmap-' . $newmapid, $item->svgcode);
-        $item->placestore = json_encode($placestore);
+        $item->itemstore = json_encode($itemstore);
         $item->course = $courseid;
         $DB->update_record('progresspath', $item);
     }

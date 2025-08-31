@@ -1,10 +1,10 @@
-let placestore = {
+let itemstore = {
     version: 2024072201,
     id: 0,
-    places: [],
+    items: [],
     paths: [],
-    startingplaces: [],
-    targetplaces: [],
+    startingitems: [],
+    targetitems: [],
     placecolor: '#c01c28',
     strokecolor: '#ffffff',
     strokeopacity: 1,
@@ -23,7 +23,7 @@ let placestore = {
     slicemode: false,
     showwaygone: false,
     /**
-     * Loads attributes from JSON into placestore
+     * Loads attributes from JSON into itemstore
      * @param {*} json
      */
     loadJSON: function(json) {
@@ -39,7 +39,7 @@ let placestore = {
         this.version = 2024072201;
     },
     /**
-     * Returns placestore as a JSON string ()
+     * Returns itemstore as a JSON string ()
      * @returns {string}
      */
     buildJSON: function() {
@@ -52,14 +52,14 @@ let placestore = {
      * @param {*} linkedActivity course module id of linked activity
      */
     addPlace: function(id, linkId, linkedActivity = null) {
-        this.places.push({
+        this.items.push({
             id: id,
             linkId: linkId,
             linkedActivity: linkedActivity,
             placecolor: null,
             visitedcolor: null
         });
-        if (this.places.length == 1) {
+        if (this.items.length == 1) {
             this.addStartingPlace(id);
         }
         this.id++;
@@ -71,66 +71,66 @@ let placestore = {
     removePlace: function(id) {
         this.removeStartingPlace(id);
         this.removeTargetPlace(id);
-        this.places = this.places.filter(
+        this.items = this.items.filter(
             function(p) {
                 return p.id != id;
             }
         );
     },
     /**
-     * Adds a place to the array of starting places
+     * Adds a place to the array of starting items
      * @param {*} id id of the place
      */
     addStartingPlace: function(id) {
-        this.startingplaces.push(id);
+        this.startingitems.push(id);
     },
     /**
-     * Removes a place from the array of starting places
+     * Removes a place from the array of starting items
      * @param {*} id id of the place
      */
     removeStartingPlace: function(id) {
-        this.startingplaces = this.startingplaces.filter(
+        this.startingitems = this.startingitems.filter(
             function(e) {
                 return e != id;
             }
         );
     },
     /**
-     * Returns whether a place is in the array of starting places
+     * Returns whether a place is in the array of starting items
      * @param {*} id id of the place
      * @returns {boolean}
      */
     isStartingPlace: function(id) {
-        return this.startingplaces.includes(id);
+        return this.startingitems.includes(id);
     },
     /**
-     * Adds a place to the array of target places
+     * Adds a place to the array of target items
      * @param {*} id id of the place
      */
     addTargetPlace: function(id) {
-        this.targetplaces.push(id);
+        this.targetitems.push(id);
     },
     /**
-     * Removes a place from the array of target places
+     * Removes a place from the array of target items
      * @param {*} id id of the place
      */
     removeTargetPlace: function(id) {
-        this.targetplaces = this.targetplaces.filter(
+        this.targetitems = this.targetitems.filter(
             function(e) {
                 return e != id;
             }
         );
     },
     /**
-     * Returns whether a place is in the array of target places
+     * Returns whether a place is in the array of target items
      * @param {number} id id of the place
      * @returns {boolean}
      */
     isTargetPlace: function(id) {
-        return this.targetplaces.includes(id);
+        return this.targetitems.includes(id);
     },
     /**
-     * Adds a path between two places
+     * Adds a path between two items
      * @param {*} pid id of the path
      * @param {*} fid id of the first place
      * @param {*} sid id of the second place
@@ -174,7 +174,7 @@ let placestore = {
      * @returns {number} id of the linked course module
      */
     getActivityId: function(id) {
-        let place = this.places.filter(
+        let place = this.items.filter(
             function(e) {
                 return id == e.id;
             }
@@ -191,7 +191,7 @@ let placestore = {
      * @param {*} linkedActivity course module id
      */
     setActivityId: function(id, linkedActivity) {
-        let place = this.places.filter(
+        let place = this.items.filter(
             function(e) {
                 return id == e.id;
             }
@@ -276,16 +276,16 @@ let placestore = {
         });
     },
     /**
-     * Returns the attributes of placestore
+     * Returns the attributes of itemstore
      * @returns {object}
      */
     getPlacestore: function() {
         return {
             id: this.id,
-            places: this.places,
+            items: this.items,
             paths: this.paths,
-            startingplaces: this.startingplaces,
-            targetplaces: this.targetplaces,
+            startingitems: this.startingitems,
+            targetitems: this.targetitems,
             placecolor: this.placecolor,
             strokecolor: this.strokecolor,
             strokeopacity: this.strokeopacity,
@@ -389,7 +389,7 @@ let placestore = {
      */
     getAllActivities: function() {
         let activities = [];
-        this.places.forEach(function(p) {
+        this.items.forEach(function(p) {
             if (p.linkedActivity) {
                 activities.push(p.linkedActivity);
             }
@@ -443,7 +443,7 @@ let placestore = {
      * @returns {array}
      */
      getPlaces: function() {
-        return this.places;
+        return this.items;
     },
     /**
      * Returns if slicemode is enabled
@@ -475,4 +475,4 @@ let placestore = {
     },
 };
 
-export default placestore;
+export default itemstore;

@@ -96,9 +96,9 @@ final class mod_progresspath_mapworker_test extends \advanced_testcase {
                 ]
             );
             // The JSON contains spare course module IDs 9999x, replacing them by the real course module IDs here.
-            $this->progresspath->placestore = str_replace(99990 + $i, $this->activities[$i]->cmid, $this->progresspath->placestore);
+            $this->progresspath->itemstore = str_replace(99990 + $i, $this->activities[$i]->cmid, $this->progresspath->itemstore);
         }
-        $DB->set_field('progresspath', 'placestore', $this->progresspath->placestore, ['id' => $this->progresspath->id]);
+        $DB->set_field('progresspath', 'itemstore', $this->progresspath->itemstore, ['id' => $this->progresspath->id]);
 
         $this->user1 = $this->getDataGenerator()->create_user(
             [
@@ -122,9 +122,9 @@ final class mod_progresspath_mapworker_test extends \advanced_testcase {
         $this->resetAfterTest();
         $this->setAdminUser();
         $this->setUser($this->user1);
-        $placestore = json_decode($this->progresspath->placestore, true);
-        $placestore['slicemode'] = true;
-        $mapworker = new mapworker($this->progresspath->svgcode, $placestore, $this->cm, false);
+        $itemstore = json_decode($this->progresspath->itemstore, true);
+        $itemstore['slicemode'] = true;
+        $mapworker = new mapworker($this->progresspath->svgcode, $itemstore, $this->cm, false);
         $mapworker->process_map_objects();
         // The values the overlay path description is expected to have.
         $expectedvalues = [
@@ -135,7 +135,7 @@ final class mod_progresspath_mapworker_test extends \advanced_testcase {
             'M 0 0 L 0 2111 L 800 2111 L 800 0 Z M 72 47 L 481 47 L 481 349 L 72 349 Z',
             'M 0 0 L 0 2111 L 800 2111 L 800 0 Z M 72 47 L 481 47 L 481 349 L 72 349 Z',
             'M 0 0 L 0 2111 L 800 2111 L 800 0 Z M 72 47 L 649 47 L 649 349 L 72 349 Z',
-            // When all places are visible, there is no overlay anymore.
+            // When all items are visible, there is no overlay anymore.
             null,
         ];
         $overlay = $mapworker->get_attribute('progresspath-overlay', 'd');
@@ -144,7 +144,7 @@ final class mod_progresspath_mapworker_test extends \advanced_testcase {
         for ($i = 0; $i < 8; $i++) {
             $activitycoursemodule = $this->modinfo->get_cm($this->activities[$i]->cmid);
             $this->completion->set_module_viewed($activitycoursemodule, $this->user1->id);
-            $mapworker = new mapworker($this->progresspath->svgcode, $placestore, $this->cm, false);
+            $mapworker = new mapworker($this->progresspath->svgcode, $itemstore, $this->cm, false);
             $mapworker->process_map_objects();
             $overlay = $mapworker->get_attribute('progresspath-overlay', 'd');
             $this->assertEquals($expectedvalues[$i], $overlay);
@@ -160,8 +160,8 @@ final class mod_progresspath_mapworker_test extends \advanced_testcase {
         $this->resetAfterTest();
         $this->setAdminUser();
         $this->setUser($this->user1);
-        $placestore = json_decode($this->progresspath->placestore, true);
-        $mapworker = new mapworker($this->progresspath->svgcode, $placestore, $this->cm, false);
+        $itemstore = json_decode($this->progresspath->itemstore, true);
+        $mapworker = new mapworker($this->progresspath->svgcode, $itemstore, $this->cm, false);
         $mapworker->process_map_objects();
         // Place p0 is a starting place, so it should be visible by default.
         $this->assertEquals(['p0'], $mapworker->get_active());
@@ -179,12 +179,12 @@ final class mod_progresspath_mapworker_test extends \advanced_testcase {
             'p9', ],
         ];
 
-        for ($i = 0; $i < count($placestore['places']); $i++) {
-            $acm = $this->modinfo->get_cm($placestore['places'][$i]['linkedActivity']);
+        for ($i = 0; $i < count($itemstore['items']); $i++) {
+            $acm = $this->modinfo->get_cm($itemstore['items'][$i]['linkedActivity']);
             $this->completion->set_module_viewed($acm, $this->user1->id);
-            $mapworker = new mapworker($this->progresspath->svgcode, $placestore, $this->cm, false);
+            $mapworker = new mapworker($this->progresspath->svgcode, $itemstore, $this->cm, false);
             $mapworker->process_map_objects();
-            // Calling array_unique removes duplicate entries (e.g. for starting places).
+            // Calling array_unique removes duplicate entries (e.g. for starting items).
             $active = array_unique($mapworker->get_active());
             $this->assertEqualsCanonicalizing($expectedvalues[$i], $active);
         }

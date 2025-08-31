@@ -8,11 +8,11 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="false" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="completiontype" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="0 = no completion 1 = reaching one target place is necessary for completion 2 = reaching all target places is necessary for completion 3 = reaching all places is necessary for completion"/>
+        <FIELD NAME="completiontype" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="0 = no completion 1 = reaching one target place is necessary for completion 2 = reaching all target items is necessary for completion 3 = reaching all items is necessary for completion"/>
         <FIELD NAME="backlink" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="showoncoursepage" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
       </FIELDS>
@@ -36,6 +36,24 @@
         <KEY NAME="progresspathid" TYPE="foreign" FIELDS="progresspathid" REFTABLE="progresspath" REFFIELDS="id"/>
         <KEY NAME="cmid" TYPE="foreign" FIELDS="cmid" REFTABLE="course_modules" REFFIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="progresspathid_idx" UNIQUE="false" FIELDS="progresspathid"/>
+        <INDEX NAME="cmid_idx" UNIQUE="false" FIELDS="cmid"/>
     </TABLE>
+    <TABLE NAME="progresspath_badges" COMMENT="Badges to be displayed on the progress path">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="progresspathid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="badgeid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="progresspathid" TYPE="foreign" FIELDS="progresspathid" REFTABLE="progresspath" REFFIELDS="id"/>
+        <KEY NAME="badgeid" TYPE="foreign" FIELDS="badgeid" REFTABLE="badge" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="progresspathid_idx" UNIQUE="false" FIELDS="progresspathid"/>
+        <INDEX NAME="badgeid_idx" UNIQUE="false" FIELDS="badgeid"/>
+      </INDEXES>
   </TABLES>
 </XMLDB>

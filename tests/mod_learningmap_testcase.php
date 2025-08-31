@@ -113,7 +113,7 @@ abstract class mod_progresspath_testcase extends \advanced_testcase {
                     'completionview' => COMPLETION_VIEW_REQUIRED,
                 ]
             );
-            $this->progresspath->placestore = str_replace(99990 + $i, $this->activities[$i]->cmid, $this->progresspath->placestore);
+            $this->progresspath->itemstore = str_replace(99990 + $i, $this->activities[$i]->cmid, $this->progresspath->itemstore);
         }
         if ($passinggrade) {
             $assignrow = $this->getDataGenerator()->create_module('assign', [
@@ -128,7 +128,7 @@ abstract class mod_progresspath_testcase extends \advanced_testcase {
             \grade_object::set_properties($gradeitem, ['gradepass' => 50.0]);
             $gradeitem->update();
             $this->activities[] = $assignrow;
-            $this->progresspath->placestore = str_replace(99997, $assignrow->cmid, $this->progresspath->placestore);
+            $this->progresspath->itemstore = str_replace(99997, $assignrow->cmid, $this->progresspath->itemstore);
             $assignrow = $this->getDataGenerator()->create_module('assign', [
                 'course' => $this->course->id,
                 'name' => 'Assign with passinggrade completion',
@@ -145,9 +145,9 @@ abstract class mod_progresspath_testcase extends \advanced_testcase {
             \grade_object::set_properties($gradeitem, ['gradepass' => 50.0]);
             $gradeitem->update();
             $this->activities[] = $assignrow;
-            $this->progresspath->placestore = str_replace(99998, $assignrow->cmid, $this->progresspath->placestore);
+            $this->progresspath->itemstore = str_replace(99998, $assignrow->cmid, $this->progresspath->itemstore);
         }
-        $DB->set_field('progresspath', 'placestore', $this->progresspath->placestore, ['id' => $this->progresspath->id]);
+        $DB->set_field('progresspath', 'itemstore', $this->progresspath->itemstore, ['id' => $this->progresspath->id]);
 
         $studentrole = $DB->get_record('role', ['shortname' => 'student']);
 

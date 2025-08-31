@@ -1,6 +1,6 @@
 import {exception as displayException} from 'core/notification';
 import Templates from 'core/templates';
-import placestore from 'mod_progresspath/placestore';
+import itemstore from 'mod_progresspath/itemstore';
 
 const circleRadius = 10;
 
@@ -75,9 +75,9 @@ export const init = () => {
 
     // Attach listeners to the activity selector
     if (activitySelector) {
-        // Show places that are not linked to an activity
+        // Show items that are not linked to an activity
         activitySelector.addEventListener('change', function() {
-            placestore.setActivityId(elementForActivitySelector, activitySelector.value);
+            itemstore.setActivityId(elementForActivitySelector, activitySelector.value);
             if (activitySelector.value) {
                 let text = document.getElementById('text' + elementForActivitySelector);
                 if (text) {
@@ -98,35 +98,35 @@ export const init = () => {
             updateActivities();
             updateCode();
         });
-        // Add / remove a place to the starting places array
+        // Add / remove a place to the starting items array
         activityStarting.addEventListener('change', function() {
             if (activityStarting.checked) {
-                placestore.addStartingPlace(elementForActivitySelector);
+                itemstore.addStartingPlace(elementForActivitySelector);
             } else {
-                placestore.removeStartingPlace(elementForActivitySelector);
+                itemstore.removeStartingPlace(elementForActivitySelector);
             }
             updateCode();
         });
-        // Add / remove a place to the target places array
+        // Add / remove a place to the target items array
         activityTarget.addEventListener('change', function() {
             if (activityTarget.checked) {
-                placestore.addTargetPlace(elementForActivitySelector);
+                itemstore.addTargetPlace(elementForActivitySelector);
                 document.getElementById(elementForActivitySelector).classList.add('progresspath-targetplace');
             } else {
-                placestore.removeTargetPlace(elementForActivitySelector);
+                itemstore.removeTargetPlace(elementForActivitySelector);
                 document.getElementById(elementForActivitySelector).classList.remove('progresspath-targetplace');
             }
             updateCode();
         });
     }
 
-    // Load placestore values from the hidden input field
-    let placestoreInput = document.getElementsByName('placestore')[0];
-    if (placestoreInput) {
-        placestore.loadJSON(placestoreInput.value);
+    // Load itemstore values from the hidden input field
+    let itemstoreInput = document.getElementsByName('itemstore')[0];
+    if (itemstoreInput) {
+        itemstore.loadJSON(itemstoreInput.value);
     }
 
-    // Mark all activities in the placestore as "used".
+    // Mark all activities in the itemstore as "used".
     updateActivities();
 
     // Attach listeners to the advanced settings div
@@ -147,15 +147,15 @@ export const init = () => {
             });
         }
 
-        advancedSettingsLogic('hidepaths', placestore.getHidePaths, placestore.setHidePaths);
-        advancedSettingsLogic('usecheckmark', placestore.getUseCheckmark, placestore.setUseCheckmark);
-        advancedSettingsLogic('hover', placestore.getHover, placestore.setHover);
-        advancedSettingsLogic('pulse', placestore.getPulse, placestore.setPulse);
-        advancedSettingsLogic('showall', placestore.getShowall, placestore.setShowall);
-        advancedSettingsLogic('hidestroke', placestore.getHideStroke, placestore.setHideStroke);
-        advancedSettingsLogic('showtext', placestore.getShowText, placestore.setShowText, fixPlaceLabels);
-        advancedSettingsLogic('slicemode', placestore.getSliceMode, placestore.setSliceMode);
-        advancedSettingsLogic('showwaygone', placestore.getShowWayGone, placestore.setShowWayGone);
+        advancedSettingsLogic('hidepaths', itemstore.getHidePaths, itemstore.setHidePaths);
+        advancedSettingsLogic('usecheckmark', itemstore.getUseCheckmark, itemstore.setUseCheckmark);
+        advancedSettingsLogic('hover', itemstore.getHover, itemstore.setHover);
+        advancedSettingsLogic('pulse', itemstore.getPulse, itemstore.setPulse);
+        advancedSettingsLogic('showall', itemstore.getShowall, itemstore.setShowall);
+        advancedSettingsLogic('hidestroke', itemstore.getHideStroke, itemstore.setHideStroke);
+        advancedSettingsLogic('showtext', itemstore.getShowText, itemstore.setShowText, fixPlaceLabels);
+        advancedSettingsLogic('slicemode', itemstore.getSliceMode, itemstore.setSliceMode);
+        advancedSettingsLogic('showwaygone', itemstore.getShowWayGone, itemstore.setShowWayGone);
     }
 
     // Attach listener to the color choosers
@@ -172,11 +172,11 @@ export const init = () => {
     registerBackgroundListener();
     updateCode();
 
-    // Enable dragging of places
-    let svg = document.getElementById('progresspath-svgmap-' + placestore.getMapid());
+    // Enable dragging of items
+    let svg = document.getElementById('progresspath-svgmap-' + itemstore.getMapid());
     makeDraggable(svg);
 
-    // Refresh stylesheet values from placestore
+    // Refresh stylesheet values from itemstore
     updateCSS();
 
     // Add listeners for clicking and context menu
@@ -203,7 +203,7 @@ export const init = () => {
             }
             if (e.target.classList.contains('progresspath-place')) {
                 e.target.classList.add('progresspath-selected-activity-selector');
-                let activityId = placestore.getActivityId(e.target.id);
+                let activityId = itemstore.getActivityId(e.target.id);
                 let scalingFactor = mapdiv.clientWidth / 800;
                 activitySetting.style.setProperty('--pos-x', e.target.cx.baseVal.value * scalingFactor + 'px');
                 activitySetting.style.setProperty('--pos-y', e.target.cy.baseVal.value * scalingFactor + 'px');
@@ -211,8 +211,8 @@ export const init = () => {
                 activitySetting.style.setProperty('--map-height', mapdiv.clientHeight + 'px');
                 activitySetting.style.display = 'block';
                 document.getElementById('progresspath-activity-selector').value = activityId;
-                document.getElementById('progresspath-activity-starting').checked = placestore.isStartingPlace(e.target.id);
-                document.getElementById('progresspath-activity-target').checked = placestore.isTargetPlace(e.target.id);
+                document.getElementById('progresspath-activity-starting').checked = itemstore.isStartingPlace(e.target.id);
+                document.getElementById('progresspath-activity-target').checked = itemstore.isTargetPlace(e.target.id);
                 elementForActivitySelector = e.target.id;
                 updateActivities();
             } else {
@@ -299,8 +299,8 @@ export const init = () => {
                 offset.x -= parseInt(selectedElement.getAttributeNS(null, "cx"));
                 offset.y -= parseInt(selectedElement.getAttributeNS(null, "cy"));
                 // Get paths that need to be updated.
-                pathsToUpdateFirstPoint = placestore.getPathsWithFid(selectedElement.id);
-                pathsToUpdateSecondPoint = placestore.getPathsWithSid(selectedElement.id);
+                pathsToUpdateFirstPoint = itemstore.getPathsWithFid(selectedElement.id);
+                pathsToUpdateSecondPoint = itemstore.getPathsWithSid(selectedElement.id);
             } else if (evt.target.nodeName == 'text') {
                 selectedElement = evt.target;
                 let place = selectedElement.parentNode.querySelector('.progresspath-place');
@@ -546,14 +546,14 @@ export const init = () => {
     }
 
     /**
-     * Updates the form fields for the SVG code and the placestore from the editor.
+     * Updates the form fields for the SVG code and the itemstore from the editor.
      */
     function updateCode() {
         if (code && mapdiv) {
             code.innerHTML = mapdiv.innerHTML;
         }
-        if (placestoreInput) {
-            document.getElementsByName('placestore')[0].value = JSON.stringify(placestore.getPlacestore());
+        if (itemstoreInput) {
+            document.getElementsByName('itemstore')[0].value = JSON.stringify(itemstore.getPlacestore());
         }
     }
 
@@ -678,16 +678,16 @@ export const init = () => {
      * @param {*} event event causing the command
      */
     function addPlace(event) {
-        let placesgroup = document.getElementById('placesGroup');
-        let placeId = 'p' + placestore.getId();
-        let linkId = 'a' + placestore.getId();
+        let itemsgroup = document.getElementById('itemsGroup');
+        let placeId = 'p' + itemstore.getId();
+        let linkId = 'a' + itemstore.getId();
         var CTM = event.target.getScreenCTM();
         if (event.touches) {
             event = event.touches[0];
         }
         let cx = (event.clientX - CTM.e) / CTM.a;
         let cy = (event.clientY - CTM.f) / CTM.d;
-        placesgroup.appendChild(
+        itemsgroup.appendChild(
             link(
                 circle(cx, cy, circleRadius, 'progresspath-place progresspath-draggable progresspath-emptyplace', placeId),
                 linkId,
@@ -695,7 +695,7 @@ export const init = () => {
                 text('text' + placeId, '', cx, cy)
             )
         );
-        placestore.addPlace(placeId, linkId);
+        itemstore.addPlace(placeId, linkId);
     }
 
     /**
@@ -751,7 +751,7 @@ export const init = () => {
     }
 
     /**
-     * Adds a path between two places.
+     * Adds a path between two items.
      * @param {number} fid id of the first place (meant to be the smaller one)
      * @param {number} sid id of the second place (meant to be the bigger one)
      */
@@ -772,14 +772,14 @@ export const init = () => {
                         pid
                     )
                 );
-                placestore.addPath(pid, 'p' + fid, 'p' + sid);
+                itemstore.addPath(pid, 'p' + fid, 'p' + sid);
             }
         }
     }
 
     /**
-     * Removes a place from the SVG and the placestore. This function also removes all
-     * touching paths and entries in statringplaces / targetplaces linking to the removed
+     * Removes a place from the SVG and the itemstore. This function also removes all
+     * touching paths and entries in statringitems / targetitems linking to the removed
      * place.
      * @param {any} event event causing the remove order
      */
@@ -787,7 +787,7 @@ export const init = () => {
         let place = document.getElementById(event.target.id);
         let parent = place.parentNode;
         removePathsTouchingPlace(event.target.id);
-        placestore.removePlace(event.target.id);
+        itemstore.removePlace(event.target.id);
         parent.removeChild(place);
         parent.parentNode.removeChild(parent);
 
@@ -799,7 +799,7 @@ export const init = () => {
      * @param {number} id id of the place
      */
     function removePathsTouchingPlace(id) {
-        placestore.getTouchingPaths(id).forEach(
+        itemstore.getTouchingPaths(id).forEach(
             function(e) {
                 removePath(e.id);
             }
@@ -807,14 +807,14 @@ export const init = () => {
     }
 
     /**
-     * Removes a path from the SVG and from the placestore
+     * Removes a path from the SVG and from the itemstore
      * @param {number} id id of the path
      */
     function removePath(id) {
         let path = document.getElementById(id);
         if (path !== null) {
             path.parentNode.removeChild(path);
-            placestore.removePath(id);
+            itemstore.removePath(id);
         }
     }
 
@@ -846,8 +846,8 @@ export const init = () => {
                 background.removeAttribute('height');
                 let height = parseInt(background.getBBox().height);
                 let width = background.getBBox().width;
-                placestore.setBackgroundDimensions(width, height);
-                svg.setAttribute('viewBox', '0 0 ' + placestore.width + ' ' + placestore.height);
+                itemstore.setBackgroundDimensions(width, height);
+                svg.setAttribute('viewBox', '0 0 ' + itemstore.width + ' ' + itemstore.height);
                 background.setAttribute('width', width);
                 background.setAttribute('height', height);
                 updateCode();
@@ -860,7 +860,7 @@ export const init = () => {
      * Calls updateCode() when completed.
      */
     function updateCSS() {
-        Templates.renderForPromise('mod_progresspath/cssskeleton', placestore.getPlacestore())
+        Templates.renderForPromise('mod_progresspath/cssskeleton', itemstore.getPlacestore())
             .then(({html, js}) => {
                 Templates.replaceNode('#progresspath-svgstyle', html, js);
                 updateCode();
@@ -874,7 +874,7 @@ export const init = () => {
      * and to show the alert for hidden activities.
      */
     function updateActivities() {
-        let activities = placestore.getAllActivities();
+        let activities = itemstore.getAllActivities();
         let options = Array.from(activitySelector.getElementsByTagName('option'));
         activityHiddenWarning.setAttribute('hidden', '');
         options.forEach(function(n) {
@@ -894,35 +894,35 @@ export const init = () => {
     /**
      * Adds the event listener to the color chooser buttons.
      * @param {*} name name of the color
-     * @param {*} secondValue name of a second placestore value that has to be changed along
+     * @param {*} secondValue name of a second itemstore value that has to be changed along
      */
     function colorChooserLogic(name, secondValue = '') {
         let colorChooser = document.getElementById('progresspath-color-' + name);
         if (colorChooser) {
             colorChooser.addEventListener('change', function() {
-                placestore.setColor(name, colorChooser.value);
+                itemstore.setColor(name, colorChooser.value);
                 if (secondValue != '') {
-                    placestore.setColor(secondValue, colorChooser.value);
+                    itemstore.setColor(secondValue, colorChooser.value);
                 }
                 updateCSS();
             });
-            colorChooser.value = placestore.getColor(name);
+            colorChooser.value = itemstore.getColor(name);
         }
     }
 
     /**
      * Adds the event listener to advanced settings menu items
      * @param {*} name Name of the item
-     * @param {*} getCall Method of placestore to call to read value
-     * @param {*} setCall Method of placestore to call to save value
+     * @param {*} getCall Method of itemstore to call to read value
+     * @param {*} setCall Method of itemstore to call to save value
      * @param {*} callback Additional callback after value is saved
      */
     function advancedSettingsLogic(name, getCall, setCall, callback = null) {
         let settingItem = document.getElementById('progresspath-advanced-setting-' + name);
         if (settingItem) {
-            settingItem.checked = getCall.call(placestore);
+            settingItem.checked = getCall.call(itemstore);
             settingItem.addEventListener('change', function() {
-                setCall.call(placestore, settingItem.checked);
+                setCall.call(itemstore, settingItem.checked);
                 if (callback !== null) {
                     callback();
                 }
@@ -936,8 +936,8 @@ export const init = () => {
      */
     function fixPlaceLabels() {
         let options = Array.from(activitySelector.getElementsByTagName('option'));
-        let places = placestore.getPlaces();
-        for (const place of places) {
+        let items = itemstore.getPlaces();
+        for (const place of items) {
             if (document.getElementById('text' + place.id) === null) {
                 let content = '';
                 for (const option of options) {

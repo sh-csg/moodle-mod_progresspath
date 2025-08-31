@@ -71,11 +71,11 @@ class cachemanager {
             $conditions['course'] = $courseid;
         }
 
-        $records = $DB->get_recordset('progresspath', $conditions, '', 'id, placestore, backlink, course');
+        $records = $DB->get_recordset('progresspath', $conditions, '', 'id, course');
         foreach ($records as $record) {
             $modinfo = get_fast_modinfo($record->course);
             $module = $modinfo->instances['progresspath'][$record->id];
-            $cmids = $DB->get_field('progresspath_items', 'cmid', ['progresspathid' => $record->id]);
+            $cmids = $DB->get_fieldset('progresspath_items', 'cmid', ['progresspathid' => $record->id]);
             $coursepageurl = course_get_format($module->course)->get_view_url($module->sectionnum);
             $coursepageurl->set_anchor('module-' . $module->id);
             foreach ($cmids as $cmid) {

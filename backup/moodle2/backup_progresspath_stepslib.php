@@ -38,7 +38,7 @@ class backup_progresspath_activity_structure_step extends backup_activity_struct
                 'intro',
                 'introformat',
                 'timemodified',
-                'placestore',
+                'itemstore',
                 'completiontype',
                 'backlink',
                 'svgcode',
