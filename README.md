@@ -1,31 +1,6 @@
 # progress paths
 
-A progresspath provides an easy way of improving the visualization of activities in a moodle course. Activities are represented as items (i.e. dots) on the map, connected by paths (i.e. lines). Activities and paths are initially invisible. Every time an activity attached to a place is completed, the place changes its color (e.g. from red to green) and all connected paths and items are gradually revealed.
-
-## Use of progresspaths
-
-progress paths can be used in many ways. They can include all activities of a course or only parts of it. They can also be nested to have different map levels (e.g. one big map for a complete school year, containing smaller maps for each topic). Usually the activities shown in the map are hidden but available for the participants. By this means, the progresspath can provide an easy way of creating a path of dependent activities without the necessity of using moodle access restrictions. progress paths can be embedded on the course page (like a label) or shown on a separate page (like a page). You can include any activity with any type of activity completion in a progresspath.
-
-## Start and completion
-
-On a progresspath you can define visible starting items. The first place you put on the map is a starting place by default. You can also define items as target items. They can be used for automatic completion of the map in three different ways: 1. The map is completed if one target place is reached (i.e. the linked activity is completed), 2. all target items are reached, 3. all items are reached. This is very convenient when using nested maps. As a consequence, progresspaths can also be used to replace parts of the function of mod_checklist.
-
-## Features
-
-As a background image, you can use any image which can be viewed in a web browser (e.g. JPG, PNG, GIF, SVG). The map is resized to the size of the image and fully responsive. You can change the color of items (different colors for visited / unvisited items) and the lines of items and paths. Target items are highlighted for the participants. If necessary, you can also hide the paths or show a checkmark at visited items.
-The map is always updated when the completion state of a linked activity changes. If the progresspath is embedded on a course page and manual completion of a linked activity is triggered, a page reload is forced to keep the map status correct. If an activity has additional restrictions (e.g. visible only after a certain date), progresspath will display it only if these restrictions are fulfilled.
-
-## Use of the editor
-
-Using the editor is very easy:
-
-1. Choose your background image - it will be immediately shown in the map editor
-2. Add items (double click on the map)
-3. Link items to activities (right click on the place)
-4. Connect items by a (single) click on both items
-5. Remove paths / items by double-clicking them
-
-If a place is not linked to an activity it is shown with reduced opacity.
+A progresspath provides an easy way of improving the visualization of activities and the overall progress in a moodle course.
 
 ## Installing via uploaded ZIP file ##
 
@@ -55,9 +30,7 @@ to complete the installation from the command line.
 The included DTD for SVG is licensed by the World Wide Web Consortium, see copyright
 notice in pix/svg11.dtd
 
-2021 ISB Bayern, Stefan Hanauska <stefan.hanauska@csg-in.de>
-Icon by Dunja Speckner
-Dragging of SVG elements by Peter Collingridge
+2025 ISB Bayern, Stefan Hanauska <stefan.hanauska@csg-in.de>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -214,16 +214,16 @@ function progresspath_cm_info_view(cm_info $cm): void {
             );
         }
 
-        $contentbeforemap = $groupdropdown . $intro;
-        $hascontentbeforemap = !empty($contentbeforemap);
+        $contentbefore = $groupdropdown . $intro;
+        $hascontentbefore = !empty($contentbefore);
 
         $mapcontainer = $OUTPUT->render_from_template(
             'mod_progresspath/rendercontainer',
             [
                 'cmId' => $cm->id,
                 'enableLiveUpdater' => true,
-                'contentbeforemap' => $contentbeforemap,
-                'hascontentbeforemap' => $hascontentbeforemap,
+                'contentbefore' => $contentbefore,
+                'hascontentbefore' => $hascontentbefore,
             ]
         );
 

@@ -16,8 +16,6 @@
 
 namespace mod_progresspath;
 
-use course_modinfo;
-
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;

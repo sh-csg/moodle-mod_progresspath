@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_progresspath';
 $plugin->release = '0.1';
-$plugin->version = 2025010201;
-$plugin->requires = 2020061500;
-$plugin->supported = [405, 405];
+$plugin->version = 2025083101;
+$plugin->requires = 2024100700;
+$plugin->supported = [405, 500];
 $plugin->maturity = MATURITY_ALPHA;

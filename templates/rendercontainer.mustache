@@ -33,16 +33,16 @@
     {
         "cmId": "123",
         "enableLiveUpdater": true,
-        "contentbeforemap": "<p>Some content before the map</p>",
-        "hascontentbeforemap": true
+        "contentbefore": "<p>Some content before the map</p>",
+        "hascontentbefore": true
     }
 }}
 <div class="progresspath-container">
-  {{#hascontentbeforemap}}
+  {{#hascontentbefore}}
   <div class="progresspath-content-before-map">
-    {{{contentbeforemap}}}
+    {{{contentbefore}}}
   </div>
-  {{/hascontentbeforemap}}
+  {{/hascontentbefore}}
   <div id="progresspath-render-container-{{cmId}}" class="progresspath-render-container">
     {{> mod_progresspath/loadingplaceholder}}
   </div>

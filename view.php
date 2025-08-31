@@ -58,7 +58,7 @@ if (!empty($cm->groupmode)) {
 
 echo $OUTPUT->render_from_template(
     'mod_progresspath/rendercontainer',
-    ['cmId' => $id, 'enableLiveUpdater' => false, 'contentbeforemap' => '', 'hascontentbeforemap' => false]
+    ['cmId' => $id, 'enableLiveUpdater' => false, 'contentbefore' => '', 'hascontentbefore' => false]
 );
 
 echo $OUTPUT->footer();

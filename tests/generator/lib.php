@@ -31,7 +31,7 @@ class mod_progresspath_generator extends testing_module_generator {
      * @param array|null $options
      * @return stdClass progresspath instance
      */
-    public function create_instance($record = null, array $options = null): stdClass {
+    public function create_instance($record = null, ?array $options = null): stdClass {
         global $CFG;
 
         $record = (array)$record + [
