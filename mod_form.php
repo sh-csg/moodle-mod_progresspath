@@ -18,6 +18,8 @@ use mod_progresspath\completion\custom_completion;
 
 defined('MOODLE_INTERNAL') || die();
 
+define('LINKED_ACTIVITIES', 10);
+
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
 require_once($CFG->dirroot . '/mod/progresspath/lib.php');
 
@@ -101,6 +103,22 @@ class mod_progresspath_mod_form extends moodleform_mod {
         );
         $mform->addRule('image', null, 'required', null, 'client');
         $mform->addHelpButton('image', 'image', 'progresspath');
+
+        // Linking the activities.
+        // Get activitynames.
+        $allactivities = [];
+        foreach ($cm->get_cms() as $cmid => $mod) {
+            // todo, check for featurecandisplay.
+            if (isset($mod->modname) && $mod->completion > 0) {
+                $allactivities[$cmid] = $mod->name;
+            }
+        }
+        // Create form elements.
+        $options['linkedactivity']['type'] = PARAM_INT;
+        $this->repeat_elements([
+            $mform->createElement('select', 'linkedactivity', get_string('linkactivity', 'progresspath') . "{no}", $allactivities),
+        ], LINKED_ACTIVITIES, $options, 'linkactivity', 'pseudoadd', 3);
+        $mform->removeElement('pseudoadd');
 
         $mform->closeHeaderBefore('header');
 
