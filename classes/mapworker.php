@@ -105,108 +105,50 @@ class mapworker {
         $allcmids = [];
         $cmidtoitems = [];
 
-        $DB->get_records('progresspath_items', ['progresspathid' => ])
+        $items = $DB->get_records('progresspath_items', ['progresspathid' => $this->cm->instance]);
 
         // Walk through all items in the map.
-        foreach ($this->itemstore['items'] as $place) {
-            $allitems[] = $place['id'];
+        foreach ($items as $item) {
+            $allitems[] = $item->id;
             // Remove items that are not linked to an activity or where the activity is missing.
-            if (empty($place['linkedActivity']) || !in_array($place['linkedActivity'], $allcms)) {
-                $impossible[] = $place['id'];
-                if (!$this->edit) {
-                    $this->svgmap->remove_place_or_path($place['id']);
-                }
+            if (empty($item->cmid) || !in_array($item->cmid, $allcms)) {
+                $impossible[] = $item->id;
                 continue;
             }
-            $allcmids[] = $place['linkedActivity'];
-            $cmidtoitems[$place['linkedActivity']][] = $place['id'];
+            $allcmids[] = $item->cmid;
+            $cmidtoitems[$item->cmid][] = $item->id;
 
-            $placecm = $modinfo->get_cm($place['linkedActivity']);
+            $placecm = $modinfo->get_cm($item->cmid);
 
             // Set the link URL in the map.
             if (!empty($placecm->url)) {
                 // Link modules that have a view page to their corresponding url.
-                $url = '' . $placecm->url;
+                $url = $placecm->url->out();
             } else {
                 // Other modules (like labels) are shown on the course page. Link to the corresponding anchor.
                 $url = $CFG->wwwroot . '/course/view.php?id=' . $placecm->course .
                 '&section=' . $placecm->sectionnum . '#module-' . $placecm->id;
             }
-            if (!$this->edit) {
-                $this->svgmap->set_link($place['linkId'], $url);
-            }
-            $links[$place['id']] = $place['linkId'];
+            
             $this->svgmap->update_text_and_title(
-                $place['id'],
+                $item->id,
                 $placecm->get_formatted_name(),
-                // Add info to target items (for accessibility).
-                in_array($place['id'], $this->itemstore['targetitems']) ?
-                ' (' . get_string('targetplace', 'progresspath') . ')' :
                 ''
             );
-            // If the place is a starting place, add it to the active items.
-            if (in_array($place['id'], $this->itemstore['startingitems'])) {
-                $this->active[] = $place['id'];
-            }
             // If the activity linked to the place is already completed, add it to the completed
             // and to the active items.
             if ($this->activitymanager->is_completed($placecm)) {
-                $completeditems[] = $place['id'];
-                $this->active[] = $place['id'];
+                $completeditems[] = $item->id;
             }
             // Places that are not accessible (e.g. because of additional availability restrictions)
             // are only shown on the map if showall mode is active.
             if (!$placecm->available) {
-                $notavailable[] = $place['id'];
+                $notavailable[] = $item->id;
             }
             // Places that are not visible and not in stealth mode (i.e. reachable by link)
             // are impossible to reach.
             if ($placecm->visible == 0 && !$placecm->is_stealth()) {
-                $impossible[] = $place['id'];
-            }
-        }
-        if (!($this->edit)) {
-            foreach ($this->itemstore['paths'] as $path) {
-                // If the beginning or the ending of the path is a completed place and this place is available,
-                // show path and the place on the other end.
-                if (in_array($path['sid'], $completeditems) || in_array($path['fid'], $completeditems)) {
-                    // Only set paths visible if hidepaths is not set in itemstore.
-                    if (!$this->itemstore['hidepaths']) {
-                        $this->active[] = $path['id'];
-                    }
-                    $this->active[] = $path['fid'];
-                    $this->active[] = $path['sid'];
-                }
-            }
-            $this->active = array_unique($this->active);
-            // Set all active paths and items to visible.
-            foreach ($this->active as $a) {
-                $this->svgmap->set_reachable($a);
-            }
-            // Make all completed items visible and set color for visited items.
-            foreach ($completeditems as $place) {
-                $this->svgmap->set_visited($place);
-                // If the option "usecheckmark" is selected, add the checkmark to the circle.
-                if ($this->itemstore['usecheckmark']) {
-                    $this->svgmap->add_checkmark($place);
-                }
-            }
-            $notavailable = array_merge(
-                array_diff($allitems, $notavailable, $completeditems, $this->active, $impossible),
-                $notavailable
-            );
-            // Handle unavailable items.
-            foreach ($notavailable as $place) {
-                if (empty($this->itemstore['showall'])) {
-                    $this->svgmap->remove_place_or_path($place);
-                } else {
-                    $this->svgmap->set_hidden($links[$place]);
-                    $this->svgmap->remove_link($links[$place]);
-                }
-            }
-            // Remove all items that are impossible to reach.
-            foreach ($impossible as $place) {
-                $this->svgmap->remove_place_or_path($place);
+                $impossible[] = $item->id;
             }
         }
         $this->svgmap->save_svg_data();

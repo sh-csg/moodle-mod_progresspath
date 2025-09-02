@@ -201,4 +201,31 @@ class svgmap {
         $elements = $this->xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' $classname ')]");
         return iterator_to_array($elements);
     }
+
+    /**
+     * Wraps all items with a specific class name in links.
+     *
+     * @param string $classname The class name to search for
+     * @param string $url The URL to link to
+     * @return void
+     */
+    public function wrap_items_in_links(string $classname, string $url): void {
+        $elements = $this->get_elements_by_classname($classname);
+        foreach ($elements as $element) {
+            $this->wrap_in_link($element->getAttribute('id'), $url);
+        }
+    }
+
+    /**
+     * Removes all elements with a specific class name.
+     *
+     * @param string $classname The class name to search for
+     * @return void
+     */
+    public function remove_elements(string $classname): void {
+        $elements = $this->get_elements_by_classname($classname);
+        foreach ($elements as $element) {
+            $element->parentNode->removeChild($element);
+        }
+    }
 }

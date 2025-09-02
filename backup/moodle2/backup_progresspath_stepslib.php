@@ -41,7 +41,6 @@ class backup_progresspath_activity_structure_step extends backup_activity_struct
                 'itemstore',
                 'completiontype',
                 'backlink',
-                'svgcode',
                 'showoncoursepage',
             ]
         );

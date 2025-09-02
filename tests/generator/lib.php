@@ -38,7 +38,6 @@ class mod_progresspath_generator extends testing_module_generator {
             'name' => 'test map',
             'intro' => 'test intro',
             'introformat' => 0,
-            'svgcode' => file_get_contents($CFG->dirroot . '/mod/progresspath/tests/generator/test.svg'),
             'showoncoursepage' => 1,
             'itemstore' => file_get_contents($CFG->dirroot . '/mod/progresspath/tests/generator/test.json'),
             'completiontype' => 2,

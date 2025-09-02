@@ -55,7 +55,7 @@ class restore_progresspath_activity_task extends restore_activity_task {
      */
     public static function define_decode_contents(): array {
         $contents = [];
-        $contents[] = new restore_decode_content('progresspath', ['intro', 'svgcode'], 'progresspath');
+        $contents[] = new restore_decode_content('progresspath', ['intro'], 'progresspath');
         return $contents;
     }
 
@@ -79,53 +79,7 @@ class restore_progresspath_activity_task extends restore_activity_task {
         $courseid = $this->get_courseid();
         $modinfo = get_fast_modinfo($courseid);
 
-        $item = $DB->get_record('progresspath', ['id' => $this->get_activityid()], '*', MUST_EXIST);
-        $cm = get_coursemodule_from_instance('progresspath', $item->id, $courseid);
-
-        $itemstore = json_decode($item->itemstore);
-
-        foreach ($itemstore->items as $place) {
-            if ($place->linkedActivity) {
-                $moduleid = restore_dbops::get_backup_ids_record($this->get_restoreid(), 'course_module', $place->linkedActivity);
-                if ($moduleid) {
-                    $place->linkedActivity = $moduleid->newitemid;
-                } else {
-                    try {
-                        if (!($place->linkedActivity === null)) {
-                            $modinfo->get_cm($place->linkedActivity);
-                        }
-                    } catch (Exception $e) {
-                        $place->linkedActivity = null;
-                    }
-                }
-            }
-        }
-        $oldmapid = $itemstore->mapid;
-        $newmapid = uniqid();
-        $itemstore->mapid = $newmapid;
-
-        if (!isset($itemstore->version) || $itemstore->version < 2024072201) {
-            $itemstore->version = 2024072201;
-            // Needs 1 as default value (otherwise all place strokes would be hidden).
-            if (!isset($itemstore->strokeopacity)) {
-                $itemstore->strokeopacity = 1;
-            }
-            if (empty($item->svgcode)) {
-                $mapcode = $item->intro;
-                $item->intro = '';
-                $item->showoncoursepage = $cm->showdescription;
-                migrationhelper::move_files_to_background_filearea($item->id);
-            } else {
-                $mapcode = $item->svgcode;
-            }
-            $mapworker = new \mod_progresspath\mapworker($mapcode, (array)$itemstore);
-            $mapworker->replace_stylesheet();
-            $mapworker->replace_defs();
-            $item->svgcode = $mapworker->get_svgcode();
-        }
-        $item->svgcode = str_replace('progresspath-svgmap-' . $oldmapid, 'progresspath-svgmap-' . $newmapid, $item->svgcode);
-        $item->itemstore = json_encode($itemstore);
-        $item->course = $courseid;
-        $DB->update_record('progresspath', $item);
+        $progresspath = $DB->get_record('progresspath', ['id' => $this->get_activityid()], '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('progresspath', $progresspath->id, $courseid);
     }
 }
