@@ -89,66 +89,71 @@ class mapworker {
     }
 
     /**
+     * Returns the completed class name for a progress path item.
+     *
+     * @param int $itemid The ID of the item
+     * @return string The completed class name
+     */
+    public function get_completed_classname_for_item(int $itemid): string {
+        return 'progresspath_' . $itemid . '_completed';
+    }
+
+    /**
+     * Returns the uncompleted class name for a progress path item.
+     *
+     * @param int $itemid The ID of the item
+     * @return string The uncompleted class name
+     */
+    public function get_uncompleted_classname_for_item(int $itemid): string {
+        return 'progresspath_' . $itemid . '_uncompleted';
+    }
+
+    /**
      * Process the map to show / hide paths and items
      * @return void
      */
     public function process_map_objects(): void {
         global $CFG, $DB, $USER;
-        $completeditems = [];
-        $notavailable = [];
-        $allitems = [];
-        $links = [];
-
         $modinfo = get_fast_modinfo($this->cm->get_course(), $USER->id);
-
         $allcms = array_keys($modinfo->get_cms());
-        $allcmids = [];
-        $cmidtoitems = [];
 
         $items = $DB->get_records('progresspath_items', ['progresspathid' => $this->cm->instance]);
 
         // Walk through all items in the map.
         foreach ($items as $item) {
-            $allitems[] = $item->id;
-            // Remove items that are not linked to an activity or where the activity is missing.
-            if (empty($item->cmid) || !in_array($item->cmid, $allcms)) {
-                $impossible[] = $item->id;
+            if (!in_array($item->cmid, $allcms)) {
+                // The course module does not exist anymore. Hide the item.
+                $this->svgmap->set_hidden($this->get_completed_classname_for_item($item->id));
+                $this->svgmap->set_hidden($this->get_uncompleted_classname_for_item($item->id));
                 continue;
             }
-            $allcmids[] = $item->cmid;
-            $cmidtoitems[$item->cmid][] = $item->id;
 
-            $placecm = $modinfo->get_cm($item->cmid);
+            $itemcm = $modinfo->get_cm($item->cmid);
 
             // Set the link URL in the map.
-            if (!empty($placecm->url)) {
+            if (!empty($itemcm->url)) {
                 // Link modules that have a view page to their corresponding url.
-                $url = $placecm->url->out();
+                $url = $itemcm->url->out();
             } else {
                 // Other modules (like labels) are shown on the course page. Link to the corresponding anchor.
-                $url = $CFG->wwwroot . '/course/view.php?id=' . $placecm->course .
-                '&section=' . $placecm->sectionnum . '#module-' . $placecm->id;
+                $url = $CFG->wwwroot . '/course/view.php?id=' . $itemcm->course .
+                '&section=' . $itemcm->sectionnum . '#module-' . $itemcm->id;
             }
-            
-            $this->svgmap->update_text_and_title(
-                $item->id,
-                $placecm->get_formatted_name(),
-                ''
-            );
+
+            $notavailable = !$itemcm->available || ($itemcm->visible == 0 && !$itemcm->is_stealth());
+
             // If the activity linked to the place is already completed, add it to the completed
             // and to the active items.
-            if ($this->activitymanager->is_completed($placecm)) {
-                $completeditems[] = $item->id;
-            }
-            // Places that are not accessible (e.g. because of additional availability restrictions)
-            // are only shown on the map if showall mode is active.
-            if (!$placecm->available) {
-                $notavailable[] = $item->id;
-            }
-            // Places that are not visible and not in stealth mode (i.e. reachable by link)
-            // are impossible to reach.
-            if ($placecm->visible == 0 && !$placecm->is_stealth()) {
-                $impossible[] = $item->id;
+            if ($this->activitymanager->is_completed($itemcm)) {
+                $this->svgmap->remove_elements_by_classname($this->get_uncompleted_classname_for_item($item->id));
+                if(!$notavailable) {
+                    $this->svgmap->wrap_items_in_links($this->get_completed_classname_for_item($item->id), $url);
+                }
+            } else {
+                $this->svgmap->remove_elements_by_classname($this->get_completed_classname_for_item($item->id));
+                if(!$notavailable) {
+                    $this->svgmap->wrap_items_in_links($this->get_uncompleted_classname_for_item($item->id), $url);
+                }
             }
         }
         $this->svgmap->save_svg_data();

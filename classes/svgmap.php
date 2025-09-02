@@ -222,7 +222,7 @@ class svgmap {
      * @param string $classname The class name to search for
      * @return void
      */
-    public function remove_elements(string $classname): void {
+    public function remove_elements_by_classname(string $classname): void {
         $elements = $this->get_elements_by_classname($classname);
         foreach ($elements as $element) {
             $element->parentNode->removeChild($element);

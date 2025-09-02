@@ -48,6 +48,7 @@ $string['name'] = 'progress path name';
 $string['name_help'] = 'The name of the progresspath is only displayed if the "Show map on course page" is not checked.';
 $string['nocompletion'] = 'No completion with map items';
 $string['nocompletionenabled'] = 'Not available because completion is not enabled';
+$string['noimage'] = 'No image present';
 $string['ownprogress'] = 'My own progress';
 $string['pluginadministration'] = 'progress path administration';
 $string['pluginname'] = 'progress path';

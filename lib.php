@@ -23,6 +23,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_progresspath\activitymanager;
 use mod_progresspath\cachemanager;
 
 /**
@@ -251,19 +252,21 @@ function progresspath_get_cm(cm_info $cm): array {
  * @return string
  */
 function progresspath_get_progresspath(cm_info $cm): string {
-    global $DB, $OUTPUT;
+    global $OUTPUT;
 
     $fs = get_file_storage();
 
     $context = \core\context\module::instance($cm->id);
 
-    $file = $fs->get_area_files($context->id, 'mod_progresspath', 'image', 0, 'filename', false)[0];
+    $files = $fs->get_area_files($context->id, 'mod_progresspath', 'image', 0, 'filename', false)[0];
+
+    $file = $files[0];
+
+    if (!$file) {
+        return $OUTPUT->notification(get_string('noimage', 'mod_progresspath'), 'error');
+    }
 
     $svg = $file->get_content();
-
-    $items = $DB->get_records('progresspath_items', ['progresspathid' => $cm->instance]);
-    $badges = $DB->get_records('progresspath_badges', ['progresspathid' => $cm->instance]);
-    $path = $DB->get_record("progresspath", ["id" => $cm->instance]);
 
     $group = (empty($cm->groupmode) ? 0 : groups_get_activity_group($cm, true));
 
@@ -288,4 +291,21 @@ function progresspath_get_progresspath(cm_info $cm): string {
  */
 function progresspath_reset_userdata($data) {
     return [];
+}
+
+/**
+ * Returns all course module ids for places of a certain progress path.
+ * @param cm_info $cm course module object for the progress path
+ * @return array
+ */
+function progresspath_get_place_cm(cm_info $cm): array {
+    global $DB;
+    $items = $DB->get_records("progresspath_items", ["progresspathid" => $cm->instance], 'id, cmid');
+    $modules = [];
+    foreach ($items as $item) {
+        if ($item->cmid != null) {
+            $modules[] = $item->cmid;
+        }
+    }
+    return $modules;
 }
