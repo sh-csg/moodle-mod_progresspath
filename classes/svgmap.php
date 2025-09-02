@@ -17,6 +17,7 @@
 namespace mod_progresspath;
 
 use DOMDocument;
+use DOMNode;
 use DOMXPath;
 
 /**
@@ -150,11 +151,22 @@ class svgmap {
     public function wrap_in_link(string $id, string $url): void {
         $element = $this->dom->getElementById($id);
         if ($element) {
-            $link = $this->dom->createElement('a');
-            $link->setAttribute('xlink:href', $url);
-            $element->parentNode->insertBefore($link, $element);
-            $link->appendChild($element);
+            $this->wrap_element_in_link($element, $url);
         }
+    }
+
+    /**
+     * Wraps an element in a link.
+     *
+     * @param DOMNode $element The element to wrap
+     * @param string $url The URL to link to
+     * @return void
+     */
+    public function wrap_element_in_link(DOMNode $element, string $url): void {
+        $link = $this->dom->createElement('a');
+        $link->setAttribute('xlink:href', $url);
+        $element->parentNode->insertBefore($link, $element);
+        $link->appendChild($element);
     }
 
     /**
@@ -212,7 +224,7 @@ class svgmap {
     public function wrap_items_in_links(string $classname, string $url): void {
         $elements = $this->get_elements_by_classname($classname);
         foreach ($elements as $element) {
-            $this->wrap_in_link($element->getAttribute('id'), $url);
+            $this->wrap_element_in_link($element, $url);
         }
     }
 
