@@ -40,6 +40,7 @@ $string['fill_backlink_cache_task'] = 'Fill progresspath backlink cache';
 $string['groupmode'] = 'Group mode';
 $string['groupmode_help'] = 'When group mode is active, it is sufficient that one member of the group has completed an activity to be able to have the connected items available.';
 $string['hiddenactivitywarning'] = 'This activity is hidden and can\'t be accessed by students';
+$string['image'] = 'Image';
 $string['loading'] = 'Progress path is loading...';
 $string['modulename'] = 'progress path';
 $string['modulename_help'] = 'The progresspath module allows to structure activities in a course as items on a map, connected by paths. Some items are starting items and shown from the beginning. Other items and paths are shown when the activities of the connected items are completed.';

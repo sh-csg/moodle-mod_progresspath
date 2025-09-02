@@ -73,11 +73,7 @@
     max-width: 90vw;
 }
 
-.progresspath-scaling-svg.progresspath-slicemode {
-    width: auto;
-}
-
-.progresspath-scaling-svg {
+.progresspath-scaling-svg-container svg {
     vertical-align: top;
     width: 100%;
     left: 0;

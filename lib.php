@@ -23,9 +23,6 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_progresspath\activitymanager;
-use mod_progresspath\cachemanager;
-
 /**
  * Adds a new progresspath instance
  *
@@ -37,9 +34,9 @@ function progresspath_add_instance($data): int {
     $progresspathid = $DB->insert_record('progresspath', $data);
 
     $context = \core\context\module::instance($data->coursemodule);
-    if (!empty($data->imagefile)) {
+    if (!empty($data->image)) {
         file_save_draft_area_files(
-            $data->imagefile,
+            $data->image,
             $context->id,
             'mod_progresspath',
             'image',
@@ -62,12 +59,12 @@ function progresspath_update_instance($data): int {
 
     $context = \core\context\module::instance($data->coursemodule);
 
-    if (!empty($data->imagefile)) {
+    if (!empty($data->image)) {
         // Delete old background files.
         $fs = get_file_storage();
         $fs->delete_area_files($context->id, 'mod_progresspath', 'image');
         file_save_draft_area_files(
-            $data->imagefile,
+            $data->image,
             $context->id,
             'mod_progresspath',
             'image',
@@ -258,9 +255,9 @@ function progresspath_get_progresspath(cm_info $cm): string {
 
     $context = \core\context\module::instance($cm->id);
 
-    $files = $fs->get_area_files($context->id, 'mod_progresspath', 'image', 0, 'filename', false)[0];
+    $files = $fs->get_area_files($context->id, 'mod_progresspath', 'image', 0, 'filename', false);
 
-    $file = $files[0];
+    $file = reset($files);
 
     if (!$file) {
         return $OUTPUT->notification(get_string('noimage', 'mod_progresspath'), 'error');

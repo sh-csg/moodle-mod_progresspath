@@ -156,6 +156,7 @@ class mapworker {
                 }
             }
         }
+        $this->remove_width_and_height();
         $this->svgmap->save_svg_data();
     }
 
@@ -177,5 +178,14 @@ class mapworker {
      */
     public function get_attribute(string $id, string $attribute): ?string {
         return $this->svgmap->get_attribute($id, $attribute);
+    }
+
+    /**
+     * Removes the width and height attributes from all SVG elements.
+     *
+     * @return void
+     */
+    public function remove_width_and_height() {
+        $this->svgmap->remove_width_and_height();
     }
 }

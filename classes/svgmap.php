@@ -228,4 +228,15 @@ class svgmap {
             $element->parentNode->removeChild($element);
         }
     }
+
+    /**
+     * Removes the width and height attributes from all SVG elements.
+     */
+    public function remove_width_and_height() {
+        $elements = $this->dom->getElementsByTagName('svg');
+        foreach ($elements as $element) {
+            $element->removeAttribute('width');
+            $element->removeAttribute('height');
+        }
+    }
 }
