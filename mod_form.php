@@ -22,6 +22,7 @@ define('LINKED_ACTIVITIES', 10);
 
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
 require_once($CFG->dirroot . '/mod/progresspath/lib.php');
+require_once($CFG->libdir . '/badgeslib.php');
 
 /**
  * Editing form for mod_progresspath
@@ -119,6 +120,23 @@ class mod_progresspath_mod_form extends moodleform_mod {
             $mform->createElement('select', 'linkedactivity', get_string('linkactivity', 'progresspath') . "{no}", $allactivities),
         ], LINKED_ACTIVITIES, $options, 'linkactivity', 'pseudoadd', 3);
         $mform->removeElement('pseudoadd');
+
+        // Badge Section Header.
+        $mform->addElement('header', 'badgeheader', 'Badges');
+
+        $badges = badges_get_badges(BADGE_TYPE_COURSE, $this->current->course);
+        $badgeoptions = [];
+        foreach ($badges as $badge) {
+            $badgeoptions[$badge->id] = $badge->name;
+        }
+
+        if (!empty($badgeoptions)) {
+            $select = $mform->addElement('select', 'badges', 'Badges auswählen', $badgeoptions);
+            $select->setMultiple(true);
+            $mform->setType('badges', PARAM_INT);
+        } else {
+            $mform->addElement('static', 'nobadges', '', 'Keine Badges im Kurs vorhanden');
+        }
 
         $mform->closeHeaderBefore('header');
 

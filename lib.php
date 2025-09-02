@@ -73,6 +73,21 @@ function progresspath_update_instance($data): int {
         );
     }
 
+    // Save linked activities.
+    if (!empty($data->linkedactivity)) {
+        // Delete all and rewrite.
+        $DB->delete_records('progresspath_items', ['progresspathid' => $data->id]);
+        foreach ($data->linkedactivity as $activitycounter => $cmid) {
+            if (!empty($cmid)) {
+                $record = new stdClass();
+                $record->progresspathid = $data->id;
+                $record->itemid = $activitycounter + 1;
+                $record->cmid = $cmid;
+                $DB->insert_record('progresspath_items', $record);
+            }
+        }
+    }
+
     return $DB->update_record("progresspath", $data);
 }
 
