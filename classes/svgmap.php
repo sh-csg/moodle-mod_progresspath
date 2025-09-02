@@ -68,9 +68,9 @@ class svgmap {
         $this->dom->validateOnParse = true;
         $this->dom->preserveWhiteSpace = false;
         $this->dom->formatOutput = true;
-        $this->xpath = new \DOMXPath($this->dom);
 
         $this->load_dom();
+        $this->xpath = new \DOMXPath($this->dom);
     }
 
     /**
