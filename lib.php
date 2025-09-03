@@ -44,6 +44,17 @@ function progresspath_add_instance($data): int {
             ['subdirs' => 0, 'maxfiles' => 1]
         );
     }
+
+    // Save badges.
+    if (!empty($data->badges)) {
+        foreach ($data->badges as $badgeid) {
+            $record = new stdClass();
+            $record->progresspathid = $progresspathid;
+            $record->badgeid = $badgeid;
+            $DB->insert_record('progresspath_badges', $record);
+        }
+    }
+
     return $progresspathid;
 }
 
@@ -85,6 +96,18 @@ function progresspath_update_instance($data): int {
                 $record->cmid = $cmid;
                 $DB->insert_record('progresspath_items', $record);
             }
+        }
+    }
+
+    // Save badges.
+    if (!empty($data->badges)) {
+        // Delete all and rewrite.
+        $DB->delete_records('progresspath_badges', ['progresspathid' => $data->id]);
+        foreach ($data->badges as $badgeid) {
+            $record = new stdClass();
+            $record->progresspathid = $data->id;
+            $record->badgeid = $badgeid;
+            $DB->insert_record('progresspath_badges', $record);
         }
     }
 
