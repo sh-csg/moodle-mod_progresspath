@@ -76,7 +76,7 @@ function progresspath_update_instance($data): int {
         );
     }
     // Save linked activities and badges.
-    progresspath_form_save_activities_and_badges($data, $progresspathid);
+    progresspath_form_save_activities_and_badges($data, $data->id);
 
     return $DB->update_record("progresspath", $data);
 }
