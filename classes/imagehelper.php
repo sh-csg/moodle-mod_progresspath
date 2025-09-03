@@ -44,7 +44,7 @@ class imagehelper {
                     if (count($viewbox) === 4) {
                         return [
                             'width' => (int)$viewbox[2] - (int)$viewbox[0],
-                            'height' => (int)$viewbox[3] - (int)$viewbox[1]
+                            'height' => (int)$viewbox[3] - (int)$viewbox[1],
                         ];
                     }
                 }
