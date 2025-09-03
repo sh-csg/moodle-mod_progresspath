@@ -107,7 +107,7 @@ class mod_progresspath_mod_form extends moodleform_mod {
 
         // Linking the activities.
         // Get activitynames.
-        $allactivities = [];
+        $allactivities = [0 => get_string('none')];
         foreach ($cm->get_cms() as $cmid => $mod) {
             // todo, check for featurecandisplay.
             if (isset($mod->modname) && $mod->completion > 0) {
