@@ -338,11 +338,13 @@ function progresspath_form_save_activities_and_badges($data, $progresspathid): v
     // Save badges.
     $DB->delete_records('progresspath_badges', ['progresspathid' => $progresspathid]);
     if (!empty($data->badges)) {
-        foreach ($data->badges as $badgeid) {
-            $record = new stdClass();
-            $record->progresspathid = $data->id;
-            $record->badgeid = $badgeid;
-            $DB->insert_record('progresspath_badges', $record);
+        foreach ($data->badges as $badgeid => $value) {
+            if ($value) {
+                $record = new stdClass();
+                $record->progresspathid = $data->id;
+                $record->badgeid = $badgeid;
+                $DB->insert_record('progresspath_badges', $record);
+            }
         }
     }
 }
