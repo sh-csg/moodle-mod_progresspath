@@ -223,8 +223,9 @@ class mod_progresspath_mod_form extends moodleform_mod {
             );
             $defaultvalues['image'] = $draftitemid;
         }
-    // Load linked activities and badges.
-    $linkedactivities = $DB->get_records('progresspath_items');
-    // $defaultvalues = []
-    $badges = $DB->get_records('progresspath_badges');
+        // Load linked activities and badges.
+        $linkedactivities = $DB->get_records('progresspath_items');
+        // $defaultvalues = []
+        $badges = $DB->get_records('progresspath_badges');
+    }
 }
