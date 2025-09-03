@@ -109,6 +109,18 @@ class mapworker {
         return 'progresspath_' . $itemid . '_uncompleted';
     }
 
+    /**
+     * Counts the number of items in the progress path.
+     * @return int The number of items
+     */
+    public function count_items(): int {
+        $i = 0;
+        while (count($this->svgmap->get_elements_by_classname($this->get_uncompleted_classname_for_item($i+1))) > 0 || 
+            count($this->svgmap->get_elements_by_classname($this->get_completed_classname_for_item($i+1))) > 0) {
+            $i++;
+        }
+        return $i;
+    }
 
     /**
      * Process the map to show / hide paths and items
@@ -119,14 +131,16 @@ class mapworker {
         $modinfo = get_fast_modinfo($this->cm->get_course(), $USER->id);
         $allcms = array_keys($modinfo->get_cms());
 
+        $itemcount = $this->count_items();
+        $useditemnumbers = [];
+
         $items = $DB->get_records('progresspath_items', ['progresspathid' => $this->cm->instance]);
 
         // Walk through all items in the map.
         foreach ($items as $item) {
+            $useditemnumbers[] = $item->itemid;
             if (!in_array($item->cmid, $allcms)) {
-                // The course module does not exist anymore. Hide the item.
-                $this->svgmap->set_hidden($this->get_completed_classname_for_item($item->id));
-                $this->svgmap->set_hidden($this->get_uncompleted_classname_for_item($item->id));
+                // The course module does not exist anymore. Skip the item.
                 continue;
             }
 
@@ -156,6 +170,13 @@ class mapworker {
                 if(!$notavailable) {
                     $this->svgmap->wrap_items_in_links($this->get_uncompleted_classname_for_item($item->itemid), $url);
                 }
+            }
+        }
+
+        for ($i = 1; $i <= $itemcount; $i++) {
+            if (!in_array($i, $useditemnumbers)) {
+                // There is no item with this number. Hide all elements with the corresponding classes.
+                $this->svgmap->remove_elements_by_classname($this->get_uncompleted_classname_for_item($i));
             }
         }
 
