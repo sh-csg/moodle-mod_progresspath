@@ -42,6 +42,7 @@ $string['groupmode'] = 'Group mode';
 $string['groupmode_help'] = 'When group mode is active, it is sufficient that one member of the group has completed an activity to be able to have the connected items available.';
 $string['hiddenactivitywarning'] = 'This activity is hidden and can\'t be accessed by students';
 $string['image'] = 'Image';
+$string['image_help'] = 'Upload an image to represent the progress path. It has to be a valid SVG file and needs classes progresspath_..._completed resp. progresspath_..._incompleted for elements that should be shown / hidden depending on activity completion. If there is a container with the id progresspath_badges, the chosen badges are shown inside the container.';
 $string['linkactivity'] = 'Linked activity: ';
 $string['loading'] = 'Progress path is loading...';
 $string['modulename'] = 'progress path';
