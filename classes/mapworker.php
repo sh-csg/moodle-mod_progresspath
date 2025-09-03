@@ -17,6 +17,7 @@
 namespace mod_progresspath;
 
 use cm_info;
+use core_badges\badge;
 
 /**
  * Class for handling the content of the progresspath
@@ -156,6 +157,27 @@ class mapworker {
                 }
             }
         }
+
+        $badges = $DB->get_records_sql('
+            SELECT DISTINCT p.badgeid 
+            FROM {progresspath_badges} p 
+            JOIN {badge} b 
+            ON p.badgeid = b.id
+            WHERE progresspathid = ?',
+            [$this->cm->instance]
+        );
+        foreach ($badges as $badge) {
+            $b = new badge($badge->badgeid);
+            if ($b->is_issued($USER->id)) {
+                $badgeimage = \moodle_url::make_pluginfile_url($b->get_context()->id, 'badges', 'badgeimage', $b->id, '/', 'f1', false);
+                $badgeelementid = $this->svgmap->insert_image('progresspath_badges', $badgeimage, 100, 100);
+                $badgeurl = new \moodle_url('/badges/badge.php');
+                $bi = $DB->get_record('badge_issued', ['badgeid' => $badge->badgeid, 'userid' => $USER->id]);
+                $badgeurl->param('hash', $bi->uniquehash);
+                $this->svgmap->wrap_in_link($badgeelementid, $badgeurl->out());
+            }
+        }
+
         $this->remove_width_and_height();
         $this->svgmap->save_svg_data();
     }

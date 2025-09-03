@@ -176,18 +176,21 @@ class svgmap {
      * @param string $url URL of the image
      * @param int $width Width of the image
      * @param int $height Height of the image
-     * @return void
+     * @return string id
      */
-    public function insert_image(string $parentid, string $url, int $width, int $height): void {
+    public function insert_image(string $parentid, string $url, int $width, int $height): string {
         $parent = $this->dom->getElementById($parentid);
         if ($parent) {
+            $id = 'progresspath-image-' . uniqid();
             $image = $this->dom->createElement('image');
             $image->setAttribute('xlink:href', $url);
-            $image->setAttribute('id', 'progresspath-image');
+            $image->setAttribute('id', $id);
             $image->setAttribute('width', (string)$width);
             $image->setAttribute('height', (string)$height);
             $parent->insertBefore($image, $parent->firstChild);
+            return $id;
         }
+        return '';
     }
 
     /**
