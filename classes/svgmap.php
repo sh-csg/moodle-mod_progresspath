@@ -165,6 +165,7 @@ class svgmap {
     public function wrap_element_in_link(DOMNode $element, string $url): void {
         $link = $this->dom->createElement('a');
         $link->setAttribute('xlink:href', $url);
+        $link->setAttribute('class', 'progresspath-link');
         $element->parentNode->insertBefore($link, $element);
         $link->appendChild($element);
     }

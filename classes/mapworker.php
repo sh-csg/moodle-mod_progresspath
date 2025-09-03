@@ -109,6 +109,7 @@ class mapworker {
         return 'progresspath_' . $itemid . '_uncompleted';
     }
 
+
     /**
      * Process the map to show / hide paths and items
      * @return void
@@ -167,7 +168,12 @@ class mapworker {
             [$this->cm->instance]
         );
         foreach ($badges as $badge) {
-            $b = new badge($badge->badgeid);
+            try {
+                $b = new badge($badge->badgeid);
+            } catch (\moodle_exception $e) {
+                // If the badge does not exist anymore, just continue.
+                continue;
+            }
             if ($b->is_issued($USER->id)) {
                 $badgeimage = \moodle_url::make_pluginfile_url($b->get_context()->id, 'badges', 'badgeimage', $b->id, '/', 'f1', false);
                 $badgeelementid = $this->svgmap->insert_image('progresspath_badges', $badgeimage, 100, 100);
