@@ -123,38 +123,17 @@ class mod_progresspath_mod_form extends moodleform_mod {
 
         // Badge selection.
         $badges = badges_get_badges(BADGE_TYPE_COURSE, $this->current->course);
-        $context = context_course::instance($this->current->course);
-        $checkboxes = [];
-        foreach ($badges as $badge) {
-            if ($badge->status == BADGE_STATUS_ACTIVE || $badge->status == BADGE_STATUS_ACTIVE_LOCKED) {
-                $badgeimage = print_badge_image($badge, $context, 'small');
-                $checkboxes[] = $mform->createElement('advcheckbox', $badge->id, '', s($badge->name) . $badgeimage, ['class' => 'd-flex flex-column-reverse align-items-center']);
+        if (!empty($badges)) {
+            $context = context_course::instance($this->current->course);
+            $checkboxes = [];
+            foreach ($badges as $badge) {
+                if ($badge->status == BADGE_STATUS_ACTIVE || $badge->status == BADGE_STATUS_ACTIVE_LOCKED) {
+                    $badgeimage = print_badge_image($badge, $context, 'small');
+                    $checkboxes[] = $mform->createElement('advcheckbox', $badge->id, '', s($badge->name) . $badgeimage, ['class' => 'd-flex flex-column-reverse align-items-center']);
+                }
             }
+            $mform->addGroup($checkboxes, 'badges', get_string('badges', 'progresspath'));
         }
-        $mform->addGroup($checkboxes, 'badges', get_string('badges', 'progresspath'));
-        // $mform->addElement('html', '<hr style="margin: 20px 0;">');
-
-        // $badgehtml = '';
-        // $context = context_course::instance($this->current->course);
-
-        // foreach ($badges as $badge) {
-        //     // Show active and active-locked badges
-        // if ($badge->status == BADGE_STATUS_ACTIVE || $badge->status == BADGE_STATUS_ACTIVE_LOCKED) {
-        //         $badgeimage = print_badge_image($badge, $context, 'small');
-                       //         $badgehtml .= '<div style="display: inline-block; text-align: center; margin: 10px; vertical-align: top;">';
-        //         $badgehtml .= $badgeimage . '<br>';
-        //         $badgehtml .= '<label><input class="form-check-input" type="checkbox" name="badges[]" value="' . $badge->id . '"> ';
-        //         $badgehtml .= s($badge->name) . '</label>';
-        //         $badgehtml .= '</div>';
-        //     }
-        // }
-        
-        // if (!empty($badgehtml)) {
-        //     $mform->addElement('static', 'badgeselection', get_string('badges', 'progresspath'), 
-        //                       '<div style="margin: 10px 0;">' . $badgehtml . '</div>');
-        // }
-
-        // badges
 
         $mform->closeHeaderBefore('header');
 
