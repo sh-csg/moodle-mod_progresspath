@@ -207,6 +207,19 @@ class mod_progresspath_mod_form extends moodleform_mod {
         if (!$this->current->instance) {
             $defaultvalues['showdescription'] = 1;
             $defaultvalues['showoncoursepage'] = 1;
+        } else {
+            $context = context_module::instance($defaultvalues['coursemodule']);
+            $draftitemid = file_get_submitted_draft_itemid('image');
+
+            file_prepare_draft_area(
+                $draftitemid,
+                $context->id,
+                'mod_progresspath',
+                'image',
+                0,
+                ['subdirs' => 0, 'maxfiles' => 1]
+            );
+            $defaultvalues['image'] = $draftitemid;
         }
     }
 }
