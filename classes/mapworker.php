@@ -145,14 +145,14 @@ class mapworker {
             // If the activity linked to the place is already completed, add it to the completed
             // and to the active items.
             if ($this->activitymanager->is_completed($itemcm)) {
-                $this->svgmap->remove_elements_by_classname($this->get_uncompleted_classname_for_item($item->id));
+                $this->svgmap->remove_elements_by_classname($this->get_uncompleted_classname_for_item($item->itemid));
                 if(!$notavailable) {
-                    $this->svgmap->wrap_items_in_links($this->get_completed_classname_for_item($item->id), $url);
+                    $this->svgmap->wrap_items_in_links($this->get_completed_classname_for_item($item->itemid), $url);
                 }
             } else {
-                $this->svgmap->remove_elements_by_classname($this->get_completed_classname_for_item($item->id));
+                $this->svgmap->remove_elements_by_classname($this->get_completed_classname_for_item($item->itemid));
                 if(!$notavailable) {
-                    $this->svgmap->wrap_items_in_links($this->get_uncompleted_classname_for_item($item->id), $url);
+                    $this->svgmap->wrap_items_in_links($this->get_uncompleted_classname_for_item($item->itemid), $url);
                 }
             }
         }
