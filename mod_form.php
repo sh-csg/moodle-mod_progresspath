@@ -203,6 +203,8 @@ class mod_progresspath_mod_form extends moodleform_mod {
      * @return void
      */
     public function data_preprocessing(&$defaultvalues): void {
+        global $DB;
+
         // Initialize a new progresspath instance.
         if (!$this->current->instance) {
             $defaultvalues['showdescription'] = 1;
@@ -222,4 +224,8 @@ class mod_progresspath_mod_form extends moodleform_mod {
             $defaultvalues['image'] = $draftitemid;
         }
     }
+    // Load linked activities and badges.
+    $linkedactivities = $DB->get_records('progresspath_items');
+    // $defaultvalues = []
+    $badges = $DB->get_records('progresspath_badges');
 }
