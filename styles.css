@@ -144,8 +144,9 @@
 .progresspath-link {
     transition: transform 0.2s ease;
     transform-origin: center;
-    transform-box: fill-box; 
+    transform-box: fill-box;
 }
+
 .progresspath-link:hover {
     transform: scale(1.12);
 }

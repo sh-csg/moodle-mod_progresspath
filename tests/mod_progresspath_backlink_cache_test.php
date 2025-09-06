@@ -80,6 +80,7 @@ final class mod_progresspath_backlink_cache_test extends \advanced_testcase {
                     'completionview' => COMPLETION_VIEW_REQUIRED,
                 ]
             );
+            
             $this->progresspaths[$progresspathnumber]->itemstore = str_replace(
                 99990 + $activitynumber,
                 $this->activities[$progresspathnumber][$activitynumber]->cmid,

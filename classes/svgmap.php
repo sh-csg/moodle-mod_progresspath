@@ -85,23 +85,6 @@ class svgmap {
     }
 
     /**
-     * Reitems the stylesheet with a new one generated from itemstore
-     *
-     * @param array $itemstoreoverride array of overrides for itemstore
-     * @return void
-     */
-    public function replace_stylesheet(array $itemstoreoverride = []): void {
-        global $OUTPUT;
-        $itemstorelocal = array_merge($this->itemstore, $itemstoreoverride);
-        $this->svgcode = preg_replace(
-            '/<style[\s\S]*style>/i',
-            $OUTPUT->render_from_template('mod_progresspath/cssskeleton', $itemstorelocal),
-            $this->svgcode
-        );
-        $this->load_dom();
-    }
-
-    /**
      * Removes tags before the SVG tag to avoid parsing problems
      *
      * @return void

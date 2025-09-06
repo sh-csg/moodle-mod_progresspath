@@ -71,16 +71,6 @@ class mapworker {
     }
 
     /**
-     * Reitems the stylesheet with a new one generated from itemstore
-     *
-     * @param array $itemstoreoverride array of overrides for itemstore
-     * @return void
-     */
-    public function replace_stylesheet(array $itemstoreoverride = []): void {
-        $this->svgmap->replace_stylesheet($itemstoreoverride);
-    }
-
-    /**
      * Removes tags before the SVG tag to avoid parsing problems
      *
      * @return void

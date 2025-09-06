@@ -315,35 +315,29 @@ function progresspath_get_place_cm(cm_info $cm): array {
 
 /**
  * Saves linked activities and badges progress path.
- * @param $data formdata
- * @param $progresspathid progresspath instance id
- * @return array
+ * @param object $data formdata
+ * @param int $progresspathid progresspath instance id
+ * @return void
  */
-function progresspath_form_save_activities_and_badges($data, $progresspathid): void {
+function progresspath_form_save_activities_and_badges(object $data, int $progresspathid): void {
     global $DB;
     // Save linked activities.
     // Delete all and rewrite.
-    $DB->delete_records('progresspath_items', ['progresspathid' => $progresspathid]);
+    $manager = new \mod_progresspath\manager($progresspathid);
+    $manager->remove_items();
     if (!empty($data->linkedactivity)) {
         foreach ($data->linkedactivity as $activitycounter => $cmid) {
             if (!empty($cmid)) {
-                $record = new stdClass();
-                $record->progresspathid = $progresspathid;
-                $record->itemid = $activitycounter + 1;
-                $record->cmid = $cmid;
-                $DB->insert_record('progresspath_items', $record);
+                $manager->add_item($cmid, $activitycounter + 1);
             }
         }
     }
     // Save badges.
-    $DB->delete_records('progresspath_badges', ['progresspathid' => $progresspathid]);
+    $manager->remove_badges();
     if (!empty($data->badges)) {
         foreach ($data->badges as $badgeid => $value) {
             if ($value) {
-                $record = new stdClass();
-                $record->progresspathid = $data->id;
-                $record->badgeid = $badgeid;
-                $DB->insert_record('progresspath_badges', $record);
+                $manager->add_badge($badgeid);
             }
         }
     }
