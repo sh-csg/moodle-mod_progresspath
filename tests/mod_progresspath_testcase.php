@@ -82,6 +82,8 @@ abstract class mod_progresspath_testcase extends \advanced_testcase {
      */
     protected $cm;
 
+    /** @var \mod_progresspath\manager $manager */
+    protected manager $manager;
     /**
      * Prepare testing environment
      * @param int $completiontype Type for automatic completion
@@ -98,6 +100,7 @@ abstract class mod_progresspath_testcase extends \advanced_testcase {
             ['course' => $this->course, 'completion' => 2, 'completiontype' => $completiontype,
             'groupmode' => ($groupmode ? SEPARATEGROUPS : NOGROUPS), ]
         );
+        $this->manager = new \mod_progresspath\manager($this->progresspath->id);
 
         $this->activities = [];
         // Create activities for this test. If we test with passing grade, the last two activities
@@ -113,7 +116,7 @@ abstract class mod_progresspath_testcase extends \advanced_testcase {
                     'completionview' => COMPLETION_VIEW_REQUIRED,
                 ]
             );
-            $this->progresspath->itemstore = str_replace(99990 + $i, $this->activities[$i]->cmid, $this->progresspath->itemstore);
+            $this->manager->add_item($this->activities[$i]->cmid, $i + 1);
         }
         if ($passinggrade) {
             $assignrow = $this->getDataGenerator()->create_module('assign', [
@@ -128,7 +131,7 @@ abstract class mod_progresspath_testcase extends \advanced_testcase {
             \grade_object::set_properties($gradeitem, ['gradepass' => 50.0]);
             $gradeitem->update();
             $this->activities[] = $assignrow;
-            $this->progresspath->itemstore = str_replace(99997, $assignrow->cmid, $this->progresspath->itemstore);
+            $this->manager->add_item($assignrow->cmid, 8);
             $assignrow = $this->getDataGenerator()->create_module('assign', [
                 'course' => $this->course->id,
                 'name' => 'Assign with passinggrade completion',
@@ -145,9 +148,8 @@ abstract class mod_progresspath_testcase extends \advanced_testcase {
             \grade_object::set_properties($gradeitem, ['gradepass' => 50.0]);
             $gradeitem->update();
             $this->activities[] = $assignrow;
-            $this->progresspath->itemstore = str_replace(99998, $assignrow->cmid, $this->progresspath->itemstore);
+            $this->manager->add_item($assignrow->cmid, 9);
         }
-        $DB->set_field('progresspath', 'itemstore', $this->progresspath->itemstore, ['id' => $this->progresspath->id]);
 
         $studentrole = $DB->get_record('role', ['shortname' => 'student']);
 
