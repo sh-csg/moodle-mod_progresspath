@@ -95,7 +95,7 @@ final class mod_progresspath_mapworker_test extends \advanced_testcase {
         $this->resetAfterTest();
         $this->setAdminUser();
         $this->setUser($this->user1);
-        $svgcode = file_get_contents(__DIR__ . '/fixtures/progresspath_mapworker_test.svg');
+        $svgcode = file_get_contents(__DIR__ . '/fixtures/example.svg');
         $mapworker = new mapworker($svgcode, $this->cm, false);
         $mapworker->process_map_objects();
         // There is no activity linked to item 10.

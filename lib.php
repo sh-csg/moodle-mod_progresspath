@@ -150,8 +150,6 @@ function progresspath_get_coursemodule_info($cm): cached_cm_info {
 
     $completiontypes = [
         'nocompletion',
-        'completion_with_one_target',
-        'completion_with_all_targets',
         'completion_with_all_items',
     ];
 

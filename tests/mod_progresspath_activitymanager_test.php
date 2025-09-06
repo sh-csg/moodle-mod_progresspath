@@ -46,7 +46,7 @@ final class mod_progresspath_activitymanager_test extends mod_progresspath_testc
     public function test_is_completed(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
-        $this->prepare(completion\custom_completion::COMPLETION_WITH_ONE_TARGET, true, true);
+        $this->prepare(completion\custom_completion::COMPLETION_WITH_ALL_ACTIVITIES, true, true);
         $this->activitymanager = new activitymanager($this->course, $this->users[0]);
         $cm = $this->modinfo->get_cm($this->activities[0]->cmid);
         $this->completion->set_module_viewed($cm, $this->users[0]->id);
