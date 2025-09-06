@@ -23,7 +23,7 @@
  */
 import {BaseComponent} from 'core/reactive';
 import {refreshModule} from 'core_course/actions';
-import {renderLearningmap} from 'mod_progresspath/renderer';
+import {renderProgresspath} from 'mod_progresspath/renderer';
 
 /**
  * The live updater component.
@@ -39,8 +39,8 @@ export default class extends BaseComponent {
     getWatchers() {
         const watchers = [];
         this.dependingModuleIds.forEach(moduleId => {
-            watchers.push({watch: `cm[${moduleId}].completionstate:updated`, handler: this._rerenderLearningmap});
-            watchers.push({watch: `cm[${moduleId}].name:updated`, handler: this._rerenderLearningmap});
+            watchers.push({watch: `cm[${moduleId}].completionstate:updated`, handler: this._rerenderProgresspath});
+            watchers.push({watch: `cm[${moduleId}].name:updated`, handler: this._rerenderProgresspath});
         });
         return watchers;
     }
@@ -48,10 +48,10 @@ export default class extends BaseComponent {
     /**
      * Handler for triggering the rerendering of the progresspath.
      */
-    _rerenderLearningmap() {
+    _rerenderProgresspath() {
         // We need this to update the automatic completion status. Unfortunately, this old function does not update the
         // JS, so we also need to render the progresspath afterwards.
         refreshModule(this.element, this.cmId);
-        renderLearningmap(this.cmId);
+        renderProgresspath(this.cmId);
     }
 }

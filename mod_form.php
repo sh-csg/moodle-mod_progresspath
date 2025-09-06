@@ -39,34 +39,8 @@ class mod_progresspath_mod_form extends moodleform_mod {
      * @return void
      */
     public function definition(): void {
+        global $CFG;
         $mform = &$this->_form;
-
-        $cm = get_fast_modinfo($this->current->course);
-
-        $s = [];
-        $activitysel = [];
-        // Gets only sections with content.
-        foreach ($cm->get_sections() as $sectionnum => $section) {
-            $sectioninfo = $cm->get_section_info($sectionnum);
-            $s['name'] = $sectioninfo->name;
-            if (empty($s['name'])) {
-                $s['name'] = get_string('section') . ' ' . $sectionnum;
-            }
-            $s['coursemodules'] = [];
-            foreach ($section as $cmid) {
-                $module = $cm->get_cm($cmid);
-                // Get only course modules which are not deleted.
-                if ($module->deletioninprogress == 0) {
-                    $s['coursemodules'][] = [
-                        'id' => $cmid,
-                        'name' => s($module->name),
-                        'completionenabled' => $module->completion > 0,
-                        'hidden' => $module->visible == 0,
-                    ];
-                }
-            }
-            $activitysel[] = $s;
-        }
 
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
@@ -106,19 +80,41 @@ class mod_progresspath_mod_form extends moodleform_mod {
         $mform->addHelpButton('image', 'image', 'progresspath');
 
         // Linking the activities.
-        // Get activitynames.
-        $allactivities = [0 => get_string('none')];
-        foreach ($cm->get_cms() as $cmid => $mod) {
-            // todo, check for featurecandisplay.
-            if (isset($mod->modname) && $mod->completion > 0) {
-                $allactivities[$cmid] = $mod->name;
+        $cm = get_fast_modinfo($this->current->course);
+
+        $activityoptions = [[0 => get_string('none')]];
+        // Gets only sections with content.
+        foreach ($cm->get_sections() as $sectionnum => $section) {
+            $sectioninfo = $cm->get_section_info($sectionnum);
+            $optgroup = $sectioninfo->name;
+            if (empty($optgroup)) {
+                $optgroup = get_string('section') . ' ' . $sectionnum;
+            }
+            $activityoptions[$optgroup] = [];
+            foreach ($section as $cmid) {
+                $module = $cm->get_cm($cmid);
+                if ($CFG->branch >= 500 && !plugin_supports('mod', $module->modname, FEATURE_CAN_DISPLAY, true)) {
+                    continue;
+                }
+                // Get only course modules which are not deleted.
+                if ($module->deletioninprogress == 0) {
+                    if ($module->completion > 0 && $module->visible != 0) {
+                        $activityoptions[$optgroup][$cmid] = s($module->name);
+                    }
+                }
             }
         }
         // Create form elements.
         $options['linkedactivity']['type'] = PARAM_INT;
-        $this->repeat_elements([
-            $mform->createElement('select', 'linkedactivity', get_string('linkactivity', 'progresspath') . "{no}", $allactivities),
-        ], LINKED_ACTIVITIES, $options, 'linkactivity', 'pseudoadd', 3);
+        $elementsgroup = [
+            $mform->createElement(
+                'selectgroups',
+                'linkedactivity',
+                get_string('linkactivity', 'progresspath') . "{no}",
+                $activityoptions
+            ),
+        ];
+        $this->repeat_elements($elementsgroup, LINKED_ACTIVITIES, $options, 'linkactivity', 'pseudoadd', 3);
         $mform->removeElement('pseudoadd');
 
         // Badge selection.
@@ -129,7 +125,13 @@ class mod_progresspath_mod_form extends moodleform_mod {
             foreach ($badges as $badge) {
                 if ($badge->status == BADGE_STATUS_ACTIVE || $badge->status == BADGE_STATUS_ACTIVE_LOCKED) {
                     $badgeimage = print_badge_image($badge, $context, 'small');
-                    $checkboxes[] = $mform->createElement('advcheckbox', $badge->id, '', s($badge->name) . $badgeimage, ['class' => 'd-flex flex-column-reverse align-items-center']);
+                    $checkboxes[] = $mform->createElement(
+                        'advcheckbox',
+                        $badge->id,
+                        '',
+                        s($badge->name) . $badgeimage,
+                        ['class' => 'd-flex flex-column-reverse align-items-center']
+                    );
                 }
             }
             $mform->addGroup($checkboxes, 'badges', get_string('badges', 'progresspath'));

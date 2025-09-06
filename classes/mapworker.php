@@ -115,8 +115,8 @@ class mapworker {
      */
     public function count_items(): int {
         $i = 0;
-        while (count($this->svgmap->get_elements_by_classname($this->get_uncompleted_classname_for_item($i+1))) > 0 || 
-            count($this->svgmap->get_elements_by_classname($this->get_completed_classname_for_item($i+1))) > 0) {
+        while (count($this->svgmap->get_elements_by_classname($this->get_uncompleted_classname_for_item($i + 1))) > 0 ||
+            count($this->svgmap->get_elements_by_classname($this->get_completed_classname_for_item($i + 1))) > 0) {
             $i++;
         }
         return $i;
@@ -162,12 +162,12 @@ class mapworker {
             // and to the active items.
             if ($this->activitymanager->is_completed($itemcm)) {
                 $this->svgmap->remove_elements_by_classname($this->get_uncompleted_classname_for_item($item->itemid));
-                if(!$notavailable) {
+                if (!$notavailable) {
                     $this->svgmap->wrap_items_in_links($this->get_completed_classname_for_item($item->itemid), $url);
                 }
             } else {
                 $this->svgmap->remove_elements_by_classname($this->get_completed_classname_for_item($item->itemid));
-                if(!$notavailable) {
+                if (!$notavailable) {
                     $this->svgmap->wrap_items_in_links($this->get_uncompleted_classname_for_item($item->itemid), $url);
                 }
             }
@@ -181,9 +181,9 @@ class mapworker {
         }
 
         $badges = $DB->get_records_sql('
-            SELECT DISTINCT p.badgeid 
-            FROM {progresspath_badges} p 
-            JOIN {badge} b 
+            SELECT DISTINCT p.badgeid
+            FROM {progresspath_badges} p
+            JOIN {badge} b
             ON p.badgeid = b.id
             WHERE progresspathid = ?',
             [$this->cm->instance]
@@ -196,7 +196,15 @@ class mapworker {
                 continue;
             }
             if ($b->is_issued($USER->id)) {
-                $badgeimage = \moodle_url::make_pluginfile_url($b->get_context()->id, 'badges', 'badgeimage', $b->id, '/', 'f1', false);
+                $badgeimage = \moodle_url::make_pluginfile_url(
+                    $b->get_context()->id,
+                    'badges',
+                    'badgeimage',
+                    $b->id,
+                    '/',
+                    'f1',
+                    false
+                );
                 $badgeelementid = $this->svgmap->insert_image('progresspath_badges', $badgeimage, 100, 100);
                 $badgeurl = new \moodle_url('/badges/badge.php');
                 $bi = $DB->get_record('badge_issued', ['badgeid' => $badge->badgeid, 'userid' => $USER->id]);

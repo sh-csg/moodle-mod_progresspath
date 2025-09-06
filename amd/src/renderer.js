@@ -36,7 +36,7 @@ export const selectors = {
  */
 export const init = (cmId) => {
     const rendererPendingPromise = new Pending('mod_progresspath/renderer-' + cmId);
-    renderLearningmap(cmId);
+    renderProgresspath(cmId);
     rendererPendingPromise.resolve();
 };
 
@@ -45,7 +45,7 @@ export const init = (cmId) => {
  *
  * @param {number} cmId the course module id of the progresspath
  */
-export const renderLearningmap = (cmId) => {
+export const renderProgresspath = (cmId) => {
     const promises = Ajax.call(
         [
             {
