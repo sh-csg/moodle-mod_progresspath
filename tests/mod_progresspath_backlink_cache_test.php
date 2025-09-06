@@ -16,6 +16,7 @@
 
 namespace mod_progresspath;
 
+use core\plugininfo\mod;
 use stdClass;
 
 /**
@@ -38,6 +39,9 @@ final class mod_progresspath_backlink_cache_test extends \advanced_testcase {
     /** @var array $activities Activities used for testing */
     private array $activities;
 
+    /** @var array $managers Manager objects for the progresspaths */
+    private array $managers;
+
     /** @var stdClass $user User used for testing */
     private stdClass $user;
 
@@ -56,14 +60,17 @@ final class mod_progresspath_backlink_cache_test extends \advanced_testcase {
             'progresspath',
             ['course' => $this->courses[0], 'backlink' => 1]
         );
+        $this->managers[0] = new \mod_progresspath\manager($this->progresspaths[0]->id);
         $this->progresspaths[1] = $this->getDataGenerator()->create_module(
             'progresspath',
             ['course' => $this->courses[0], 'backlink' => 0]
         );
+        $this->managers[1] = new \mod_progresspath\manager($this->progresspaths[1]->id);
         $this->progresspaths[2] = $this->getDataGenerator()->create_module(
             'progresspath',
             ['course' => $this->courses[0], 'backlink' => 1, 'visible' => 0, 'visibleold' => 1]
         );
+        $this->managers[2] = new \mod_progresspath\manager($this->progresspaths[2]->id);
 
         $this->activities = [];
         // Create activities for this test. The first 9 activities are in the first progresspath, the next 9 in the second.
@@ -80,12 +87,8 @@ final class mod_progresspath_backlink_cache_test extends \advanced_testcase {
                     'completionview' => COMPLETION_VIEW_REQUIRED,
                 ]
             );
-            
-            $this->progresspaths[$progresspathnumber]->itemstore = str_replace(
-                99990 + $activitynumber,
-                $this->activities[$progresspathnumber][$activitynumber]->cmid,
-                $this->progresspaths[$progresspathnumber]->itemstore
-            );
+
+            $this->managers[$progresspathnumber]->add_item($this->activities[$progresspathnumber][$activitynumber]->cmid);
         }
         $this->activities[3][0] = $this->getDataGenerator()->create_module(
             'page',
@@ -95,9 +98,6 @@ final class mod_progresspath_backlink_cache_test extends \advanced_testcase {
                 'course' => $this->courses[1],
             ]
         );
-        $DB->set_field('progresspath', 'itemstore', $this->progresspaths[0]->itemstore, ['id' => $this->progresspaths[0]->id]);
-        $DB->set_field('progresspath', 'itemstore', $this->progresspaths[1]->itemstore, ['id' => $this->progresspaths[1]->id]);
-        $DB->set_field('progresspath', 'itemstore', $this->progresspaths[2]->itemstore, ['id' => $this->progresspaths[2]->id]);
 
         $studentrole = $DB->get_record('role', ['shortname' => 'student']);
 
@@ -185,7 +185,8 @@ final class mod_progresspath_backlink_cache_test extends \advanced_testcase {
         $PAGE->set_activity_record($this->activities[0][0]);
 
         $descriptionbefore = $PAGE->activityheader->export_for_template($OUTPUT)['description'];
-        progresspath_before_http_headers();
+        $beforehttpheadershook = new \core\hook\output\before_http_headers($OUTPUT);
+        \mod_progresspath\local\hook_callbacks::inject_backlinks_into_activity_header($beforehttpheadershook);
 
         $descriptionafter = $PAGE->activityheader->export_for_template($OUTPUT)['description'];
         $this->assertNotEquals($descriptionbefore, $descriptionafter);
@@ -197,7 +198,8 @@ final class mod_progresspath_backlink_cache_test extends \advanced_testcase {
         $PAGE->set_activity_record($this->activities[1][1]);
 
         $descriptionbefore = $PAGE->activityheader->export_for_template($OUTPUT)['description'];
-        progresspath_before_http_headers();
+        $beforehttpheadershook = new \core\hook\output\before_http_headers($OUTPUT);
+        \mod_progresspath\local\hook_callbacks::inject_backlinks_into_activity_header($beforehttpheadershook);
 
         $descriptionafter = $PAGE->activityheader->export_for_template($OUTPUT)['description'];
         $this->assertEquals($descriptionbefore, $descriptionafter);
@@ -209,7 +211,8 @@ final class mod_progresspath_backlink_cache_test extends \advanced_testcase {
         $PAGE->set_activity_record($this->activities[3][0]);
 
         $descriptionbefore = $PAGE->activityheader->export_for_template($OUTPUT)['description'];
-        progresspath_before_http_headers();
+        $beforehttpheadershook = new \core\hook\output\before_http_headers($OUTPUT);
+        \mod_progresspath\local\hook_callbacks::inject_backlinks_into_activity_header($beforehttpheadershook);
 
         $descriptionafter = $PAGE->activityheader->export_for_template($OUTPUT)['description'];
         $this->assertEquals($descriptionbefore, $descriptionafter);
@@ -221,7 +224,8 @@ final class mod_progresspath_backlink_cache_test extends \advanced_testcase {
         $PAGE->set_activity_record($this->activities[2][1]);
 
         $descriptionbefore = $PAGE->activityheader->export_for_template($OUTPUT)['description'];
-        progresspath_before_http_headers();
+        $beforehttpheadershook = new \core\hook\output\before_http_headers($OUTPUT);
+        \mod_progresspath\local\hook_callbacks::inject_backlinks_into_activity_header($beforehttpheadershook);
 
         $descriptionafter = $PAGE->activityheader->export_for_template($OUTPUT)['description'];
         $this->assertEquals($descriptionbefore, $descriptionafter);

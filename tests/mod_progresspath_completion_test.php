@@ -37,48 +37,12 @@ require_once($CFG->dirroot . '/mod/progresspath/tests/mod_progresspath_testcase.
  */
 final class mod_progresspath_completion_test extends mod_progresspath_testcase {
     /**
-     * Tests completiontype 1 in individual mode
-     *
-     * @return void
-     */
-    public function test_completiontype1_individual(): void {
-        $this->run_completion_test(custom_completion::COMPLETION_WITH_ONE_TARGET, false, 7);
-    }
-
-    /**
-     * Tests completiontype 2 in individual mode
-     *
-     * @return void
-     */
-    public function test_completiontype2_individual(): void {
-        $this->run_completion_test(custom_completion::COMPLETION_WITH_ALL_TARGETS, false, 8);
-    }
-
-    /**
      * Tests completiontype 3 in individual mode
      *
      * @return void
      */
     public function test_completiontype3_individual(): void {
-        $this->run_completion_test(custom_completion::COMPLETION_WITH_ALL_PLACES, false, 8);
-    }
-
-    /**
-     * Tests completiontype 1 in group mode
-     *
-     * @return void
-     */
-    public function test_completiontype1_group(): void {
-        $this->run_completion_test(custom_completion::COMPLETION_WITH_ONE_TARGET, true, 7);
-    }
-
-    /**
-     * Tests completiontype 2 in group mode
-     *
-     * @return void
-     */
-    public function test_completiontype2_group(): void {
-        $this->run_completion_test(custom_completion::COMPLETION_WITH_ALL_TARGETS, true, 8);
+        $this->run_completion_test(custom_completion::COMPLETION_WITH_ALL_ACTIVITIES, false, 8);
     }
 
     /**
@@ -87,7 +51,7 @@ final class mod_progresspath_completion_test extends mod_progresspath_testcase {
      * @return void
      */
     public function test_completiontype3_group(): void {
-        $this->run_completion_test(custom_completion::COMPLETION_WITH_ALL_PLACES, true, 8);
+        $this->run_completion_test(custom_completion::COMPLETION_WITH_ALL_ACTIVITIES, true, 8);
     }
 
     /**

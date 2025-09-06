@@ -29,47 +29,21 @@ use mod_progresspath\completion\custom_completion;
  * @covers     \mod_progresspath\mapworker
  */
 final class mod_progresspath_mapworker_test extends \advanced_testcase {
-    /**
-     * The course used for testing
-     *
-     * @var \stdClass
-     */
+    /** @var \stdClass $course The course used for testing */
     protected $course;
-    /**
-     * The progresspath used for testing
-     *
-     * @var \stdClass
-     */
+    /** @var \stdClass $progresspath The progresspath used for testing */
     protected $progresspath;
-    /**
-     * The activities linked in the progresspath
-     *
-     * @var array
-     */
+    /** @var array $activities The activities linked in the progresspath */
     protected $activities;
-    /**
-     * The user used for testing
-     *
-     * @var \stdClass
-     */
+    /** @var \mod_progresspath\manager $manager */
+    protected manager $manager;
+    /** @var \stdClass $user1 The user used for testing */
     protected $user1;
-    /**
-     * The modinfo of the course
-     *
-     * @var \course_modinfo|null
-     */
+    /** @var \course_modinfo|null $modinfo The modinfo object for the course */
     protected $modinfo;
-    /**
-     * The completion info of the course
-     *
-     * @var \completion_info
-     */
+    /** @var \completion_info $completion The completion info of the course */
     protected $completion;
-    /**
-     * The cm_info object belonging to the progresspath (differs from the progresspath record)
-     *
-     * @var \cm_info
-     */
+    /** @var \cm_info $cm The cm_info object belonging to the progresspath (differs from the progresspath record) */
     protected $cm;
     /**
      * Prepare testing environment
@@ -82,6 +56,7 @@ final class mod_progresspath_mapworker_test extends \advanced_testcase {
             'completion' => COMPLETION_TRACKING_AUTOMATIC,
             'completiontype' => custom_completion::NOCOMPLETION,
         ]);
+        $this->manager = new \mod_progresspath\manager($this->progresspath->id);
 
         $this->activities = [];
         for ($i = 0; $i < 9; $i++) {
@@ -95,10 +70,8 @@ final class mod_progresspath_mapworker_test extends \advanced_testcase {
                     'completionview' => COMPLETION_VIEW_REQUIRED,
                 ]
             );
-            // The JSON contains spare course module IDs 9999x, replacing them by the real course module IDs here.
-            $this->progresspath->itemstore = str_replace(99990 + $i, $this->activities[$i]->cmid, $this->progresspath->itemstore);
+            $this->manager->add_item($this->activities[$i]->cmid, $i + 1);
         }
-        $DB->set_field('progresspath', 'itemstore', $this->progresspath->itemstore, ['id' => $this->progresspath->id]);
 
         $this->user1 = $this->getDataGenerator()->create_user(
             [
@@ -114,44 +87,6 @@ final class mod_progresspath_mapworker_test extends \advanced_testcase {
     }
 
     /**
-     * Tests slicemode
-     *
-     * @return void
-     */
-    public function test_slicemode(): void {
-        $this->resetAfterTest();
-        $this->setAdminUser();
-        $this->setUser($this->user1);
-        $itemstore = json_decode($this->progresspath->itemstore, true);
-        $itemstore['slicemode'] = true;
-        $mapworker = new mapworker($this->progresspath->svgcode, $itemstore, $this->cm, false);
-        $mapworker->process_map_objects();
-        // The values the overlay path description is expected to have.
-        $expectedvalues = [
-            'M 0 0 L 0 2111 L 800 2111 L 800 0 Z M 72 47 L 338 47 L 338 108 L 72 108 Z',
-            'M 0 0 L 0 2111 L 800 2111 L 800 0 Z M 72 47 L 338 47 L 338 242 L 72 242 Z',
-            'M 0 0 L 0 2111 L 800 2111 L 800 0 Z M 72 47 L 481 47 L 481 349 L 72 349 Z',
-            'M 0 0 L 0 2111 L 800 2111 L 800 0 Z M 72 47 L 481 47 L 481 349 L 72 349 Z',
-            'M 0 0 L 0 2111 L 800 2111 L 800 0 Z M 72 47 L 481 47 L 481 349 L 72 349 Z',
-            'M 0 0 L 0 2111 L 800 2111 L 800 0 Z M 72 47 L 481 47 L 481 349 L 72 349 Z',
-            'M 0 0 L 0 2111 L 800 2111 L 800 0 Z M 72 47 L 649 47 L 649 349 L 72 349 Z',
-            // When all items are visible, there is no overlay anymore.
-            null,
-        ];
-        $overlay = $mapworker->get_attribute('progresspath-overlay', 'd');
-        $this->assertEquals('M 0 0 L 0 2111 L 800 2111 L 800 0 Z M 37 12 L 137 12 L 137 112 L 37 112 Z', $overlay);
-
-        for ($i = 0; $i < 8; $i++) {
-            $activitycoursemodule = $this->modinfo->get_cm($this->activities[$i]->cmid);
-            $this->completion->set_module_viewed($activitycoursemodule, $this->user1->id);
-            $mapworker = new mapworker($this->progresspath->svgcode, $itemstore, $this->cm, false);
-            $mapworker->process_map_objects();
-            $overlay = $mapworker->get_attribute('progresspath-overlay', 'd');
-            $this->assertEquals($expectedvalues[$i], $overlay);
-        }
-    }
-
-    /**
      * Tests visibility dependent on activity completion
      *
      * @return void
@@ -160,33 +95,26 @@ final class mod_progresspath_mapworker_test extends \advanced_testcase {
         $this->resetAfterTest();
         $this->setAdminUser();
         $this->setUser($this->user1);
-        $itemstore = json_decode($this->progresspath->itemstore, true);
-        $mapworker = new mapworker($this->progresspath->svgcode, $itemstore, $this->cm, false);
+        $svgcode = file_get_contents(__DIR__ . '/fixtures/progresspath_mapworker_test.svg');
+        $mapworker = new mapworker($svgcode, $this->cm, false);
         $mapworker->process_map_objects();
-        // Place p0 is a starting place, so it should be visible by default.
-        $this->assertEquals(['p0'], $mapworker->get_active());
-        $expectedvalues = [
-            ['p0', 'p1', 'p0_1'],
-            ['p0', 'p1', 'p0_1', 'p4', 'p1_4'],
-            ['p0', 'p1', 'p0_1', 'p4', 'p1_4', 'p2', 'p2_3', 'p3', 'p2_6', 'p6'],
-            ['p0', 'p1', 'p0_1', 'p4', 'p1_4', 'p2', 'p2_3', 'p3', 'p2_6', 'p6', 'p3_6'],
-            ['p0', 'p1', 'p0_1', 'p4', 'p1_4', 'p2', 'p2_3', 'p3', 'p2_6', 'p6', 'p3_6', 'p4_5', 'p5'],
-            ['p0', 'p1', 'p0_1', 'p4', 'p1_4', 'p2', 'p2_3', 'p3', 'p2_6', 'p6', 'p3_6', 'p4_5', 'p5', 'p5_6'],
-            ['p0', 'p1', 'p0_1', 'p4', 'p1_4', 'p2', 'p2_3', 'p3', 'p2_6', 'p6', 'p3_6', 'p4_5', 'p5', 'p5_6', 'p6_8', 'p8'],
-            ['p0', 'p1', 'p0_1', 'p4', 'p1_4', 'p2', 'p2_3', 'p3', 'p2_6', 'p6', 'p3_6', 'p4_5', 'p5', 'p5_6', 'p6_8', 'p8', 'p8_9',
-            'p9', ],
-            ['p0', 'p1', 'p0_1', 'p4', 'p1_4', 'p2', 'p2_3', 'p3', 'p2_6', 'p6', 'p3_6', 'p4_5', 'p5', 'p5_6', 'p6_8', 'p8', 'p8_9',
-            'p9', ],
-        ];
-
-        for ($i = 0; $i < count($itemstore['items']); $i++) {
-            $acm = $this->modinfo->get_cm($itemstore['items'][$i]['linkedActivity']);
+        // There is no activity linked to item 10.
+        $this->assertEquals(1, $mapworker->count_completed(10));
+        $this->assertEquals(0, $mapworker->count_uncompleted(10));
+        // All other item numbers should only show the uncompleted elements.
+        for ($i = 0; $i < 9; $i++) {
+            $acm = $this->modinfo->get_cm($this->activities[$i]->cmid);
             $this->completion->set_module_viewed($acm, $this->user1->id);
-            $mapworker = new mapworker($this->progresspath->svgcode, $itemstore, $this->cm, false);
+            $mapworker = new mapworker($svgcode, $this->cm, false);
             $mapworker->process_map_objects();
-            // Calling array_unique removes duplicate entries (e.g. for starting items).
-            $active = array_unique($mapworker->get_active());
-            $this->assertEqualsCanonicalizing($expectedvalues[$i], $active);
+            for ($j = 0; $j <= $i; $j++) {
+                $this->assertEquals(1, $mapworker->count_completed($j + 1), 'Item ' . ($j + 1) . ' should be completed after viewing activity ' . ($i + 1));
+                $this->assertEquals(0, $mapworker->count_uncompleted($j + 1), 'Item ' . ($j + 1) . ' should not be uncompleted after viewing activity ' . ($i + 1));
+            }
+            for ($j = $i + 1; $j < 9; $j++) {
+                $this->assertEquals(0, $mapworker->count_completed($j + 1), 'Item ' . ($j + 1) . ' should not be completed after viewing activity ' . ($i + 1));
+                $this->assertEquals(1, $mapworker->count_uncompleted($j + 1), 'Item ' . ($j + 1) . ' should be uncompleted after viewing activity ' . ($i + 1));
+            }
         }
     }
 }

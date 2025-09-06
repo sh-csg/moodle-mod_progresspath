@@ -235,4 +235,26 @@ class mapworker {
     public function remove_width_and_height() {
         $this->svgmap->remove_width_and_height();
     }
+
+    /**
+     * Counts the number of elements that have the class for a certain item set.
+     *
+     * @param int $itemid The id of the item
+     * @return int The number of elements with the class name
+     */
+    public function count_completed(int $itemid) {
+        $completed = $this->svgmap->get_elements_by_classname($this->get_completed_classname_for_item($itemid));
+        return count($completed);
+    }
+
+    /**
+     * Counts the number of elements that have the class for a certain item set.
+     *
+     * @param int $itemid The id of the item
+     * @return int The number of elements with the class name
+     */
+    public function count_uncompleted(int $itemid) {
+        $uncompleted = $this->svgmap->get_elements_by_classname($this->get_uncompleted_classname_for_item($itemid));
+        return count($uncompleted);
+    }
 }
