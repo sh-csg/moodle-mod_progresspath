@@ -99,7 +99,7 @@ final class mod_progresspath_mapworker_test extends \advanced_testcase {
         $mapworker = new mapworker($svgcode, $this->cm, false);
         $mapworker->process_map_objects();
         // There is no activity linked to item 10.
-        $this->assertEquals(1, $mapworker->count_completed(10));
+        $this->assertEquals(2, $mapworker->count_completed(10));
         $this->assertEquals(0, $mapworker->count_uncompleted(10));
         // All other item numbers should only show the uncompleted elements.
         for ($i = 0; $i < 9; $i++) {

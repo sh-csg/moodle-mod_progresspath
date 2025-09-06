@@ -53,7 +53,7 @@ class custom_completion extends \core_completion\activity_custom_completion {
         $this->validate_rule($rule);
 
         $map = $DB->get_record("progresspath", ["id" => $this->cm->instance], 'completiontype', MUST_EXIST);
-        $cmids = $DB->get_field('progresspath_items', 'cmid', ['progresspathid' => $this->cm->instance]);
+        $cmids = $DB->get_fieldset('progresspath_items', 'cmid', ['progresspathid' => $this->cm->instance]);
 
         if ($map->completiontype != self::NOCOMPLETION) {
             $user = \core_user::get_user($this->userid);
